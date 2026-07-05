@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "Слушаю… произнесите ключевое слово для пробуждения.",
+  "custom_asat_Mic level very low — check the microphone device.": "Уровень сигнала микрофона очень низкий — проверьте микрофонное устройство.",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "НЕ обнаружено — пиковый балл %s (порог %s), уровень микрофона %s, %s кадров.",
+  "custom_asat_Start the instance to test the wake word.": "Запустите экземпляр, чтобы проверить кодовое слово для активации.",
+  "custom_asat_Test wake word (%s s)": "Тестовое ключевое слово для активации (%s s)",
+  "custom_asat_Try lowering the threshold or speaking closer.": "Попробуйте снизить порог слышимости или говорить ближе.",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Кодовое слово ОБНАРУЖЕНО — пиковый балл %s (пороговое значение %s), уровень микрофона %s.",
+  "custom_asat_Wake word detected!": "Кодовое слово обнаружено!",
+  "custom_asat_Wake-word test": "Тест на ключевое слово для пробуждения",
+  "custom_asat_mic": "микрофон",
+  "custom_asat_score": "счет",
+  "custom_asat_threshold": "порог"
+}

@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "Escuchando… di la palabra clave",
+  "custom_asat_Mic level very low — check the microphone device.": "El nivel del micrófono es muy bajo; revise el dispositivo de micrófono.",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NO detectado: puntuación máxima %s (umbral %s), nivel de micrófono %s, %s fotogramas.",
+  "custom_asat_Start the instance to test the wake word.": "Inicie la instancia para probar la palabra de activación.",
+  "custom_asat_Test wake word (%s s)": "Palabra de activación de prueba (%s s)",
+  "custom_asat_Try lowering the threshold or speaking closer.": "Intenta bajar el umbral o hablar más cerca.",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Palabra clave DETECTED: puntuación máxima %s (umbral %s), nivel de micrófono %s.",
+  "custom_asat_Wake word detected!": "¡Palabra de activación detectada!",
+  "custom_asat_Wake-word test": "Prueba de palabra clave",
+  "custom_asat_mic": "micrófono",
+  "custom_asat_score": "puntaje",
+  "custom_asat_threshold": "límite"
+}

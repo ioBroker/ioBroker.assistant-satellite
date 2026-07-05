@@ -72,6 +72,7 @@
   },
   "native": {
     "assistantInstance": "",
+    "transport": "ioBroker",
     "hostOverride": "",
     "room": "",
     "port": 7776,
@@ -79,6 +80,8 @@
     "micDevice": "default",
     "speakerDevice": "default",
     "wakewordModel": "hey_jarvis",
+    "wakewordModel2": "",
+    "wakewordModel3": "",
     "wakewordThreshold": 0.5,
     "silenceThreshold": 300,
     "silenceMs": 800,

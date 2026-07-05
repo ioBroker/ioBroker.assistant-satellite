@@ -1,14 +1,14 @@
 {
-    "custom_asat_Wake-word test": "Wake-word test",
+    "custom_asat_Listening… say the wake word": "Listening… say the wake word",
+    "custom_asat_Mic level very low — check the microphone device.": "Mic level very low — check the microphone device.",
+    "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NOT detected — peak score %s (threshold %s), mic level %s, %s frames.",
     "custom_asat_Start the instance to test the wake word.": "Start the instance to test the wake word.",
     "custom_asat_Test wake word (%s s)": "Test wake word (%s s)",
-    "custom_asat_Listening… say the wake word": "Listening… say the wake word",
+    "custom_asat_Try lowering the threshold or speaking closer.": "Try lowering the threshold or speaking closer.",
+    "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Wake word DETECTED — peak score %s (threshold %s), mic level %s.",
+    "custom_asat_Wake word detected!": "Wake word detected!",
+    "custom_asat_Wake-word test": "Wake-word test",
     "custom_asat_mic": "mic",
     "custom_asat_score": "score",
-    "custom_asat_threshold": "threshold",
-    "custom_asat_Wake word detected!": "Wake word detected!",
-    "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Wake word DETECTED — peak score %s (threshold %s), mic level %s.",
-    "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NOT detected — peak score %s (threshold %s), mic level %s, %s frames.",
-    "custom_asat_Mic level very low — check the microphone device.": "Mic level very low — check the microphone device.",
-    "custom_asat_Try lowering the threshold or speaking closer.": "Try lowering the threshold or speaking closer."
+    "custom_asat_threshold": "threshold"
 }

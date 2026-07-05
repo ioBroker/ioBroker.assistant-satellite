@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "Écoute… prononcez le mot d’éveil",
+  "custom_asat_Mic level very low — check the microphone device.": "Niveau du micro très faible — vérifiez le microphone.",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NON détecté — score de crête %s (seuil %s), niveau du micro %s, %s images.",
+  "custom_asat_Start the instance to test the wake word.": "Démarrez l'instance pour tester le mot de réveil.",
+  "custom_asat_Test wake word (%s s)": "Mot de réveil de test (%s s)",
+  "custom_asat_Try lowering the threshold or speaking closer.": "Essayez d'abaisser le seuil ou de parler plus près.",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Mot d'activation DÉTECTÉ — score de crête %s (seuil %s), niveau du micro %s.",
+  "custom_asat_Wake word detected!": "Mot d'activation détecté !",
+  "custom_asat_Wake-word test": "Test du mot de réveil",
+  "custom_asat_mic": "micro",
+  "custom_asat_score": "score",
+  "custom_asat_threshold": "seuil"
+}

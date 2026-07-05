@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "Luister… zeg het wekwoord",
+  "custom_asat_Mic level very low — check the microphone device.": "Het microfoonniveau is erg laag — controleer de microfoon.",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NIET gedetecteerd — piekscore %s (drempelwaarde %s), microfoonniveau %s, %s frames.",
+  "custom_asat_Start the instance to test the wake word.": "Start het exemplaar om het activeringswoord te testen.",
+  "custom_asat_Test wake word (%s s)": "Test het activeringswoord (%s s)",
+  "custom_asat_Try lowering the threshold or speaking closer.": "Probeer de drempel te verlagen of dichterbij te spreken.",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Wake word gedetecteerd — piekscore %s (drempelwaarde %s), microfoonniveau %s.",
+  "custom_asat_Wake word detected!": "Activeringswoord gedetecteerd!",
+  "custom_asat_Wake-word test": "Wake-woordtest",
+  "custom_asat_mic": "microfoon",
+  "custom_asat_score": "score",
+  "custom_asat_threshold": "drempelwaarde"
+}

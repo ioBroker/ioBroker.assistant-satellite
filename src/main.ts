@@ -1,5 +1,11 @@
 import { Adapter, getAbsoluteInstanceDataDir, type AdapterOptions } from '@iobroker/adapter-core';
-import { Satellite, loadConfig, probeWakeWord, type SatelliteState } from '@iobroker/assistant-satellite';
+import {
+    Satellite,
+    LocalListener,
+    loadConfig,
+    probeWakeWord,
+    type SatelliteState,
+} from '@iobroker/assistant-satellite';
 import { execFile } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
@@ -25,6 +31,8 @@ interface WakeTestMsg {
     micDevice?: string;
     audioBackend?: string;
     wakewordModel?: string;
+    wakewordModel2?: string;
+    wakewordModel3?: string;
     wakewordThreshold?: number | string;
 }
 
@@ -46,6 +54,8 @@ interface WakeTestResult {
 interface AdapterConfig {
     /** Selected ioBroker.assistant instance, e.g. "assistant.0". */
     assistantInstance: string;
+    /** Transport to the assistant: 'udp' = Hannah audio stream; 'ioBroker' = audio blobs over sendTo (no UDP). */
+    transport: 'udp' | 'ioBroker';
     /** Force a specific adapter IP (overrides the resolved one). */
     hostOverride: string;
     room: string;
@@ -55,6 +65,9 @@ interface AdapterConfig {
     micDevice: string;
     speakerDevice: string;
     wakewordModel: string;
+    /** Optional additional wake words — the satellite triggers on any of them. */
+    wakewordModel2: string;
+    wakewordModel3: string;
     wakewordThreshold: number;
     silenceThreshold: number;
     silenceMs: number;
@@ -74,6 +87,8 @@ function sameSubnet(a: string, b: string, netmask: string): boolean {
 class AssistantSatellite extends Adapter {
     declare config: AdapterConfig;
     private satellite: Satellite | null = null;
+    /** ioBroker-transport listener (no UDP); used when transport = 'ioBroker'. */
+    private localListener: LocalListener | null = null;
 
     public constructor(options: Partial<AdapterOptions> = {}) {
         super({ ...options, name: 'assistant-satellite' });
@@ -87,18 +102,28 @@ class AssistantSatellite extends Adapter {
         return getAbsoluteInstanceDataDir(this);
     }
 
-    private async onReady(): Promise<void> {
-        const c = this.config;
-        const { host, port } = await this.resolveAssistant();
-        if (!host) {
-            this.log.warn('No assistant selected — pick an ioBroker.assistant instance in the settings.');
-        } else {
-            this.log.info(`ioBroker.assistant → ${host}:${port} (instance ${c.assistantInstance || '-'}).`);
-        }
+    /** Combine the up-to-three wake-word fields into the comma-separated list the core lib parses. */
+    private joinWakewords(c: AdapterConfig): string {
+        const list = [c.wakewordModel, c.wakewordModel2, c.wakewordModel3]
+            .map(s => (s || '').trim())
+            .filter(Boolean);
+        return list.length ? list.join(',') : 'hey_jarvis';
+    }
 
-        const cfg = loadConfig({
+    /** Wake-word list for a test: the (unsaved) form fields if present, else the saved config. */
+    private joinTestWakewords(msg: WakeTestMsg, c: AdapterConfig): string {
+        const fromMsg = [msg.wakewordModel, msg.wakewordModel2, msg.wakewordModel3]
+            .map(s => (s || '').trim())
+            .filter(Boolean);
+        return fromMsg.length ? fromMsg.join(',') : this.joinWakewords(c);
+    }
+
+    /** Build the core-lib config shared by the UDP satellite and the local listener. */
+    private buildCoreConfig(host: string, port: number): ReturnType<typeof loadConfig> {
+        const c = this.config;
+        return loadConfig({
             logLevel: this.log.level === 'debug' || this.log.level === 'silly' ? 'debug' : 'info',
-            device: this.namespace.replace('.', '-'), // e.g. assistant-satellite-0
+            device: this.namespace.replace('.', '-'),
             room: c.room || '',
             host,
             port,
@@ -106,7 +131,7 @@ class AssistantSatellite extends Adapter {
             audioBackend: c.audioBackend || 'auto',
             micDevice: c.micDevice || 'default',
             speakerDevice: c.speakerDevice || 'default',
-            wakewordModel: c.wakewordModel || 'hey_jarvis',
+            wakewordModel: this.joinWakewords(c),
             wakewordThreshold: c.wakewordThreshold || 0.5,
             modelsDir: path.join(this.instanceDataDir(), 'models'),
             silenceThreshold: c.silenceThreshold || 300,
@@ -115,6 +140,79 @@ class AssistantSatellite extends Adapter {
             maxRecordMs: c.maxRecordMs || 8000,
             preBufferChunks: c.preBufferChunks ?? 5,
         });
+    }
+
+    /**
+     * ioBroker transport: local wake-word + record, send the utterance to the assistant over the message
+     * bus (`voice` sendTo), play back the returned reply. No UDP, STT/TTS stay central on the assistant.
+     */
+    private async startLocalListener(): Promise<void> {
+        const cfg = this.buildCoreConfig('', 0); // host/port unused in this mode
+        this.localListener = new LocalListener(cfg, {
+            log: this.log,
+            onStatus: (state: SatelliteState) => {
+                this.setState('status', { val: state, ack: true }).catch(e => this.log.error(`Cannot set status: ${e}`));
+            },
+            onUtterance: (pcm, sampleRate) => this.queryAssistant(pcm, sampleRate),
+        });
+        try {
+            await this.localListener.start();
+            await this.setState('info.connection', { val: true, ack: true });
+        } catch (e) {
+            this.log.error(`Could not start local listener: ${(e as Error).message}`);
+            await this.setState('info.connection', { val: false, ack: true });
+        }
+    }
+
+    /** Send a recorded utterance to the assistant and return the reply audio to play, or null. */
+    private async queryAssistant(pcm: Buffer, sampleRate: number): Promise<{ pcm: Buffer; sampleRate: number } | null> {
+        const inst = this.config.assistantInstance;
+        if (!inst) {
+            this.log.warn('No assistant instance selected — cannot send the query.');
+            return null;
+        }
+        try {
+            const res = (await this.sendToAsync(inst, 'voice', {
+                audio: pcm.toString('base64'),
+                format: 'pcm',
+                sampleRate,
+                source: this.namespace.replace('.', '-'),
+            })) as { text?: string; answer?: string; audio?: string; sampleRate?: number; error?: string };
+            if (res?.error) {
+                this.log.warn(`Assistant error: ${res.error}`);
+                return null;
+            }
+            if (res?.text) {
+                this.log.info(`Q: ${res.text}`);
+            }
+            if (res?.answer) {
+                this.log.info(`A: ${res.answer}`);
+            }
+            if (res?.audio) {
+                return { pcm: Buffer.from(res.audio, 'base64'), sampleRate: res.sampleRate || 24000 };
+            }
+            return null;
+        } catch (e) {
+            this.log.error(`Assistant query failed: ${(e as Error).message}`);
+            return null;
+        }
+    }
+
+    private async onReady(): Promise<void> {
+        const c = this.config;
+        if ((c.transport || 'ioBroker') === 'ioBroker') {
+            this.log.info(`ioBroker transport → assistant '${c.assistantInstance || '-'}' (no UDP).`);
+            await this.startLocalListener();
+            return;
+        }
+        const { host, port } = await this.resolveAssistant();
+        if (!host) {
+            this.log.warn('No assistant selected — pick an ioBroker.assistant instance in the settings.');
+        } else {
+            this.log.info(`ioBroker.assistant → ${host}:${port} (instance ${c.assistantInstance || '-'}).`);
+        }
+
+        const cfg = this.buildCoreConfig(host, port);
 
         this.satellite = new Satellite(cfg, {
             log: this.log,
@@ -147,16 +245,18 @@ class AssistantSatellite extends Adapter {
             audioBackend: ((msg.audioBackend || c.audioBackend || 'auto').trim() || 'auto') as
                 'auto' | 'alsa' | 'ffmpeg',
             micDevice: (msg.micDevice || '').trim() || c.micDevice || 'default',
-            wakewordModel: (msg.wakewordModel || '').trim() || c.wakewordModel || 'hey_jarvis',
+            wakewordModel: this.joinTestWakewords(msg, c),
             wakewordThreshold: Number(msg.wakewordThreshold) || c.wakewordThreshold || 0.5,
             modelsDir: path.join(this.instanceDataDir(), 'models'),
         });
-        const wasRunning = !!this.satellite;
+        const wasRunning = !!this.satellite || !!this.localListener;
         try {
-            if (this.satellite) {
+            if (this.satellite || this.localListener) {
                 this.log.info('Pausing satellite for the wake-word test …');
-                await this.satellite.stop();
+                await this.satellite?.stop();
+                await this.localListener?.stop();
                 this.satellite = null;
+                this.localListener = null;
                 await new Promise(r => setTimeout(r, 300)); // let ALSA fully release the mic before re-opening
             }
             await this.setState('test.detected', { val: false, ack: true });
@@ -509,6 +609,7 @@ class AssistantSatellite extends Adapter {
     private async onUnload(callback: () => void): Promise<void> {
         try {
             await this.satellite?.stop();
+            await this.localListener?.stop();
             await this.setState('info.connection', { val: false, ack: true });
         } catch {
             // ignore

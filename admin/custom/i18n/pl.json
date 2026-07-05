@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "Słuchanie… wypowiedz słowo budzące",
+  "custom_asat_Mic level very low — check the microphone device.": "Poziom sygnału mikrofonowego jest bardzo niski — sprawdź mikrofon.",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NIE wykryto — wynik szczytowy %s (próg %s), poziom mikrofonu %s, %s klatek.",
+  "custom_asat_Start the instance to test the wake word.": "Uruchom instancję, aby przetestować słowo wybudzające.",
+  "custom_asat_Test wake word (%s s)": "Testowe słowo wybudzające (%s s)",
+  "custom_asat_Try lowering the threshold or speaking closer.": "Spróbuj obniżyć próg lub mówić bliżej.",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Wykryto słowo wybudzające — wynik szczytowy %s (próg %s), poziom mikrofonu %s.",
+  "custom_asat_Wake word detected!": "Wykryto słowo wybudzające!",
+  "custom_asat_Wake-word test": "Test słowa wybudzającego",
+  "custom_asat_mic": "mikrofon",
+  "custom_asat_score": "wynik",
+  "custom_asat_threshold": "próg"
+}

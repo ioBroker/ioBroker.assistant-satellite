@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "Слухаю… скажи слово для пробудження",
+  "custom_asat_Mic level very low — check the microphone device.": "Дуже низький рівень мікрофона — перевірте мікрофонний пристрій.",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "НЕ виявлено — піковий бал %s (поріг %s), рівень мікрофона %s, кадрів %s.",
+  "custom_asat_Start the instance to test the wake word.": "Запустіть екземпляр, щоб перевірити слово пробудження.",
+  "custom_asat_Test wake word (%s s)": "Тестове слово пробудження (%s s)",
+  "custom_asat_Try lowering the threshold or speaking closer.": "Спробуйте знизити поріг або говорити ближче.",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "ВИЯВЛЕНО слово пробудження — піковий бал %s (поріг %s), рівень мікрофона %s.",
+  "custom_asat_Wake word detected!": "Виявлено слово пробудження!",
+  "custom_asat_Wake-word test": "Тест на слова, що прокидаються",
+  "custom_asat_mic": "мікрофон",
+  "custom_asat_score": "рахунок",
+  "custom_asat_threshold": "поріг"
+}

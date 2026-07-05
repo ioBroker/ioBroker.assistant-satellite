@@ -116,6 +116,8 @@ export default class WakeWordTestComponent extends ConfigGeneric<ConfigGenericPr
                 micDevice: d.micDevice,
                 audioBackend: d.audioBackend,
                 wakewordModel: d.wakewordModel,
+                wakewordModel2: d.wakewordModel2,
+                wakewordModel3: d.wakewordModel3,
                 wakewordThreshold: d.wakewordThreshold,
             })
             .then(res => {

@@ -1,0 +1,14 @@
+{
+  "custom_asat_Listening… say the wake word": "聆听……说出唤醒词",
+  "custom_asat_Mic level very low — check the microphone device.": "麦克风音量非常低——请检查麦克风设备。",
+  "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "未检测到——峰值得分%s（阈值%s），麦克风电平%s，%s帧。",
+  "custom_asat_Start the instance to test the wake word.": "启动实例以测试唤醒词。",
+  "custom_asat_Test wake word (%s s)": "测试唤醒词（%s 秒）",
+  "custom_asat_Try lowering the threshold or speaking closer.": "尝试降低阈值或靠近说话。",
+  "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "唤醒词已检测到 — 峰值得分 %s（阈值 %s），麦克风电平 %s。",
+  "custom_asat_Wake word detected!": "检测到唤醒词！",
+  "custom_asat_Wake-word test": "唤醒词测试",
+  "custom_asat_mic": "麦克风",
+  "custom_asat_score": "分数",
+  "custom_asat_threshold": "临界点"
+}

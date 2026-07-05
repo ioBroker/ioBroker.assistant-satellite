@@ -8,9 +8,21 @@
             "type": "instance",
             "adapter": "assistant",
             "label": "Assistant instance",
-            "help": "The ioBroker.assistant instance whose voice server this satellite streams to. Host IP and port are resolved automatically (needs the instance running).",
+            "help": "The ioBroker.assistant instance this satellite talks to (needs the instance running).",
             "sm": 12,
             "md": 5
+        },
+        "transport": {
+            "type": "select",
+            "label": "Transport",
+            "help": "ioBroker = audio over the message bus, no UDP port, STT/TTS central (recommended). UDP = Hannah audio stream (ESP-compatible).",
+            "options": [
+                { "label": "ioBroker (message bus, no UDP)", "value": "ioBroker" },
+                { "label": "UDP (Hannah / ESP stream)", "value": "udp" }
+            ],
+            "default": "ioBroker",
+            "sm": 12,
+            "md": 4
         },
         "port": {
             "type": "number",
@@ -19,6 +31,7 @@
             "default": 7776,
             "min": 1,
             "max": 65535,
+            "hidden": "data.transport === 'ioBroker'",
             "sm": 6,
             "md": 3
         },
@@ -27,6 +40,7 @@
             "type": "text",
             "label": "Host IP override (optional)",
             "help": "Force a specific IP if the automatic resolution picks the wrong interface.",
+            "hidden": "data.transport === 'ioBroker'",
             "sm": 12,
             "md": 4
         },
@@ -81,7 +95,30 @@
             "freeSolo": true,
             "default": "hey_jarvis",
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "lg": 3
+        },
+        "wakewordModel2": {
+            "type": "autocompleteSendTo",
+            "label": "Wake word 2 (optional)",
+            "help": "A second wake word — the satellite triggers on any of them.",
+            "command": "getWakewords",
+            "freeSolo": true,
+            "hidden": "!data.wakewordModel",
+            "sm": 6,
+            "md": 4,
+            "lg": 3
+        },
+        "wakewordModel3": {
+            "type": "autocompleteSendTo",
+            "label": "Wake word 3 (optional)",
+            "help": "A third wake word.",
+            "command": "getWakewords",
+            "freeSolo": true,
+            "hidden": "!data.wakewordModel || !data.wakewordModel2",
+            "sm": 6,
+            "md": 4,
+            "lg": 3
         },
         "wakewordThreshold": {
             "type": "number",
@@ -92,7 +129,8 @@
             "max": 1,
             "step": 0.05,
             "sm": 6,
-            "md": 2
+            "md": 2,
+            "lg": 3
         },
         "_wakeTest": {
             "newLine": true,

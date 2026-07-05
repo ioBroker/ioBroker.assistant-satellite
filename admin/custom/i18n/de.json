@@ -1,14 +1,14 @@
 {
-    "custom_asat_Wake-word test": "Wake-Word-Test",
+    "custom_asat_Listening… say the wake word": "Höre zu… sag das Wake-Word",
+    "custom_asat_Mic level very low — check the microphone device.": "Mic-Pegel sehr niedrig — prüfe das Mikrofon-Gerät.",
+    "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NICHT erkannt — Peak-Score %s (Schwelle %s), Mic-Pegel %s, %s Frames.",
     "custom_asat_Start the instance to test the wake word.": "Instanz starten, um das Wake-Word zu testen.",
     "custom_asat_Test wake word (%s s)": "Wake-Word testen (%s s)",
-    "custom_asat_Listening… say the wake word": "Höre zu… sag das Wake-Word",
+    "custom_asat_Try lowering the threshold or speaking closer.": "Schwelle senken oder näher sprechen.",
+    "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Wake-Word ERKANNT — Peak-Score %s (Schwelle %s), Mic-Pegel %s.",
+    "custom_asat_Wake word detected!": "Wake-Word erkannt!",
+    "custom_asat_Wake-word test": "Wake-Word-Test",
     "custom_asat_mic": "Mikro",
     "custom_asat_score": "Score",
-    "custom_asat_threshold": "Schwelle",
-    "custom_asat_Wake word detected!": "Wake-Word erkannt!",
-    "custom_asat_Wake word DETECTED — peak score %s (threshold %s), mic level %s.": "Wake-Word ERKANNT — Peak-Score %s (Schwelle %s), Mic-Pegel %s.",
-    "custom_asat_NOT detected — peak score %s (threshold %s), mic level %s, %s frames.": "NICHT erkannt — Peak-Score %s (Schwelle %s), Mic-Pegel %s, %s Frames.",
-    "custom_asat_Mic level very low — check the microphone device.": "Mic-Pegel sehr niedrig — prüfe das Mikrofon-Gerät.",
-    "custom_asat_Try lowering the threshold or speaking closer.": "Schwelle senken oder näher sprechen."
+    "custom_asat_threshold": "Schwelle"
 }
