@@ -22,6 +22,8 @@
     "Built-in: hey_jarvis, alexa, hey_mycroft, hey_rhasspy. Or a URL / local .onnx path.": "Eingebaut: hey_jarvis, alexa, hey_mycroft, hey_rhasspy. Oder URL / lokaler .onnx-Pfad.",
     "Threshold (0–1)": "Schwelle (0–1)",
     "Lower = more sensitive.": "Niedriger = empfindlicher.",
+    "Test wake word (15 s)": "Wake-Word testen (15 s)",
+    "Click, then say the wake word a few times within 15 s. The result shows whether it was detected and the peak score. Uses the current (unsaved) mic/wake-word settings; pauses the running satellite during the test.": "Klicken, dann das Wake-Word innerhalb von 15 s ein paar Mal sagen. Das Ergebnis zeigt, ob es erkannt wurde und den Peak-Score. Nutzt die aktuellen (ungespeicherten) Mikro-/Wake-Word-Einstellungen; der laufende Satellit wird während des Tests pausiert.",
     "Log level": "Log-Level",
     "Recording (advanced)": "Aufnahme (erweitert)",
     "Silence RMS threshold": "Stille-RMS-Schwelle",

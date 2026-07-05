@@ -94,6 +94,15 @@
             "sm": 6,
             "md": 2
         },
+        "_wakeTest": {
+            "newLine": true,
+            "type": "custom",
+            "i18n": true,
+            "url": "custom/customComponents.js",
+            "name": "ConfigCustomAssistantSatellite/Components/WakeWordTestComponent",
+            "bundlerType": "module",
+            "sm": 12
+        },
         "_recHeader": { "newLine": true, "type": "header", "size": 3, "text": "Recording (advanced)" },
         "silenceThreshold": {
             "newLine": true,

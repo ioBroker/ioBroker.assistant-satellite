@@ -121,6 +121,83 @@
         "def": "idle"
       },
       "native": {}
+    },
+    {
+      "_id": "test",
+      "type": "channel",
+      "common": { "name": "Wake-word test" },
+      "native": {}
+    },
+    {
+      "_id": "test.peakScore",
+      "type": "state",
+      "common": {
+        "name": "Peak wake-word score during the last test",
+        "type": "number",
+        "role": "value",
+        "min": 0,
+        "max": 1,
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.detected",
+      "type": "state",
+      "common": {
+        "name": "Wake word detected during the last test",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.score",
+      "type": "state",
+      "common": {
+        "name": "Live wake-word score during the test",
+        "type": "number",
+        "role": "value",
+        "min": 0,
+        "max": 1,
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.micLevel",
+      "type": "state",
+      "common": {
+        "name": "Live microphone level (RMS) during the test",
+        "type": "number",
+        "role": "value",
+        "min": 0,
+        "max": 32768,
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.running",
+      "type": "state",
+      "common": {
+        "name": "Wake-word test is running",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
     }
   ]
 }

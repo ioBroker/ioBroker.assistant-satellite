@@ -1,5 +1,5 @@
 import { Adapter, getAbsoluteInstanceDataDir, type AdapterOptions } from '@iobroker/adapter-core';
-import { Satellite, loadConfig, type SatelliteState } from '@iobroker/assistant-satellite';
+import { Satellite, loadConfig, probeWakeWord, type SatelliteState } from '@iobroker/assistant-satellite';
 import { execFile } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
@@ -17,6 +17,29 @@ const MODEL_SUPPORT_FILES = ['melspectrogram.onnx', 'embedding_model.onnx'];
 interface DeviceOption {
     label: string;
     value: string;
+}
+
+/** Payload of the `testWakeWord` sendTo — the (possibly unsaved) form values needed for the probe. */
+interface WakeTestMsg {
+    seconds?: number | string;
+    micDevice?: string;
+    audioBackend?: string;
+    wakewordModel?: string;
+    wakewordThreshold?: number | string;
+}
+
+/** Result of `testWakeWord`: structured fields (for a localized GUI message) + an English fallback string. */
+interface WakeTestResult {
+    error?: string;
+    /** English fallback / log line. */
+    result?: string;
+    detected?: boolean;
+    peakScore?: number;
+    threshold?: number;
+    micLevel?: number;
+    frames?: number;
+    /** Mic level was near-silent — hint to check the device. */
+    lowLevel?: boolean;
 }
 
 /** Adapter settings (mirrors io-package.json `native`). */
@@ -108,6 +131,78 @@ class AssistantSatellite extends Adapter {
         } catch (e) {
             this.log.error(`Could not start satellite: ${(e as Error).message}`);
             await this.setState('info.connection', { val: false, ack: true });
+        }
+    }
+
+    /**
+     * GUI "Test wake word": listen on the mic for `seconds` and report whether the wake word was
+     * detected (peak score + level). Uses the (unsaved) form values passed in `msg`, falling back to the
+     * saved config, so the test works without saving. Pauses the running satellite and restarts it after.
+     */
+    private async testWakeWord(msg: WakeTestMsg): Promise<WakeTestResult> {
+        const c = this.config;
+        const seconds = Number(msg.seconds) || 15;
+        const cfg = loadConfig({
+            device: this.namespace.replace('.', '-'),
+            audioBackend: ((msg.audioBackend || c.audioBackend || 'auto').trim() || 'auto') as
+                'auto' | 'alsa' | 'ffmpeg',
+            micDevice: (msg.micDevice || '').trim() || c.micDevice || 'default',
+            wakewordModel: (msg.wakewordModel || '').trim() || c.wakewordModel || 'hey_jarvis',
+            wakewordThreshold: Number(msg.wakewordThreshold) || c.wakewordThreshold || 0.5,
+            modelsDir: path.join(this.instanceDataDir(), 'models'),
+        });
+        const wasRunning = !!this.satellite;
+        try {
+            if (this.satellite) {
+                this.log.info('Pausing satellite for the wake-word test …');
+                await this.satellite.stop();
+                this.satellite = null;
+                await new Promise(r => setTimeout(r, 300)); // let ALSA fully release the mic before re-opening
+            }
+            await this.setState('test.detected', { val: false, ack: true });
+            await this.setState('test.running', { val: true, ack: true });
+            this.log.info(`Wake-word test: listening ${seconds} s — say the wake word now …`);
+            const res = await probeWakeWord(cfg, this.log, seconds, (score, rms, detected) => {
+                // Live values for the interactive GUI meter.
+                this.setState('test.score', { val: Math.round(score * 1000) / 1000, ack: true }).catch(() => {});
+                this.setState('test.micLevel', { val: Math.round(rms), ack: true }).catch(() => {});
+                if (detected) {
+                    this.setState('test.detected', { val: true, ack: true }).catch(() => {});
+                }
+            });
+            await this.setState('test.peakScore', { val: Math.round(res.peakScore * 1000) / 1000, ack: true });
+            await this.setState('test.detected', { val: res.detected, ack: true });
+            const hint =
+                res.peakRms < 200
+                    ? ' Mic level very low — check the microphone device.'
+                    : res.detected
+                      ? ''
+                      : ' Try lowering the threshold or speaking closer.';
+            const message = res.detected
+                ? `Wake word DETECTED — peak score ${res.peakScore.toFixed(2)} (threshold ${res.threshold}), mic level ${res.peakRms.toFixed(0)}.`
+                : `NOT detected — peak score ${res.peakScore.toFixed(2)} (threshold ${res.threshold}), mic level ${res.peakRms.toFixed(0)}, ${res.frames} frames.${hint}`;
+            this.log.info(`Wake-word test result: ${message}`);
+            // Structured fields so the admin GUI can render a localized message; `result` = English fallback.
+            return {
+                result: message,
+                detected: res.detected,
+                peakScore: Math.round(res.peakScore * 100) / 100,
+                threshold: res.threshold,
+                micLevel: Math.round(res.peakRms),
+                frames: res.frames,
+                lowLevel: res.peakRms < 200,
+            };
+        } catch (e) {
+            return { error: (e as Error).message };
+        } finally {
+            await this.setState('test.running', { val: false, ack: true }).catch(() => {});
+            if (wasRunning) {
+                try {
+                    await this.onReady(); // rebuild + restart the satellite
+                } catch (e) {
+                    this.log.error(`Could not restart satellite after test: ${(e as Error).message}`);
+                }
+            }
         }
     }
 
@@ -212,6 +307,13 @@ class AssistantSatellite extends Adapter {
             const options = await this.listWakewords();
             if (obj.callback) {
                 this.sendTo(obj.from, obj.command, options, obj.callback);
+            }
+            return;
+        }
+        if (obj?.command === 'testWakeWord') {
+            const result = await this.testWakeWord((obj.message || {}) as WakeTestMsg);
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, result, obj.callback);
             }
             return;
         }
