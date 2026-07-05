@@ -44,6 +44,9 @@
                 "js-controller": ">=6.0.11"
             }
         ],
+        "osDependencies": {
+            "linux": ["alsa-utils"]
+        },
         "messagebox": true
     },
     "native": {
