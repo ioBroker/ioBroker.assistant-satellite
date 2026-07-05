@@ -33,6 +33,10 @@ speak → the answer is played back. The `status` state shows `idle` / `listenin
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (@GermanBluefox) Support of multiple wake-words
+* (@GermanBluefox) Added test of wake-words
+
 ### 0.0.2 (2026-07-05)
 * (@GermanBluefox) Initial commit
 
