@@ -31,6 +31,7 @@
         "readme": "https://github.com/ioBroker/ioBroker.assistant-satellite/blob/main/README.md",
         "loglevel": "info",
         "mode": "daemon",
+        "nogit": true,
         "type": "communication",
         "compact": false,
         "connectionType": "local",
