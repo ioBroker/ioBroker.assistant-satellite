@@ -1,0 +1,100 @@
+{
+    "common": {
+        "name": "assistant-satellite",
+        "version": "0.0.1",
+        "title": "Assistant Satellite",
+        "news": {
+
+        },
+        "titleLang": {
+            "en": "Assistant Satellite",
+            "de": "Assistent-Satellit",
+            "ru": "Сателлит ассистента"
+        },
+        "desc": {
+            "en": "Voice satellite for ioBroker.assistant: wake word + microphone streaming + spoken reply, running on this host.",
+            "de": "Sprach-Satellit für ioBroker.assistant: Wake-Word + Mikrofon-Streaming + gesprochene Antwort, läuft auf diesem Host.",
+            "ru": "Голосовой сателлит для ioBroker.assistant: слово-активатор, стриминг микрофона и озвученный ответ на этом хосте."
+        },
+        "authors": ["ioBroker"],
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
+        "tier": 3,
+        "keywords": ["assistant", "voice", "satellite", "wakeword"],
+        "platform": "Javascript/Node.js",
+        "main": "build/main.js",
+        "icon": "assistant-satellite.svg",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.assistant-satellite/main/admin/assistant-satellite.svg",
+        "readme": "https://github.com/ioBroker/ioBroker.assistant-satellite/blob/main/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "communication",
+        "compact": false,
+        "connectionType": "local",
+        "dataSource": "push",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "messagebox": true
+    },
+    "native": {
+        "assistantInstance": "",
+        "hostOverride": "",
+        "room": "",
+        "port": 7776,
+        "audioBackend": "auto",
+        "micDevice": "default",
+        "speakerDevice": "default",
+        "wakewordModel": "hey_jarvis",
+        "wakewordThreshold": 0.5,
+        "silenceThreshold": 300,
+        "silenceMs": 800,
+        "minRecordMs": 800,
+        "maxRecordMs": 8000,
+        "preBufferChunks": 5,
+        "logLevel": "info"
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": { "name": "Information" },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "name": "Satellite registered with the adapter",
+                "type": "boolean",
+                "role": "indicator.connected",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "status",
+            "type": "state",
+            "common": {
+                "name": "Satellite status (idle/listening/processing/speaking)",
+                "type": "string",
+                "role": "text",
+                "read": true,
+                "write": false,
+                "def": "idle"
+            },
+            "native": {}
+        }
+    ]
+}

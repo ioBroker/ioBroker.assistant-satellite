@@ -1,0 +1,10 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        // The test files live outside src/, so widen the root and add the
+        // globals the tests need (node built-ins + the mocha describe/it API).
+        "rootDir": ".",
+        "types": ["@iobroker/types", "node", "mocha"]
+    },
+    "include": ["./**/*.ts"]
+}
