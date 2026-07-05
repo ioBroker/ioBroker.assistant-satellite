@@ -84,8 +84,7 @@
     "silenceMs": 800,
     "minRecordMs": 800,
     "maxRecordMs": 8000,
-    "preBufferChunks": 5,
-    "logLevel": "info"
+    "preBufferChunks": 5
   },
   "objects": [],
   "instanceObjects": [

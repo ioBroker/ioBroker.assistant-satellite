@@ -1,18 +1,28 @@
+// Root tsconfig to set the settings and power editor support for all TS files
 {
+    "compileOnSave": true,
     "compilerOptions": {
-        "target": "ES2022",
-        "module": "node16",
-        "moduleResolution": "node16",
-        "lib": ["ES2022"],
-        "outDir": "build",
-        "rootDir": "src",
-        "declaration": false,
-        "sourceMap": true,
-        "strict": true,
+        "noEmit": true,
+        "allowJs": true,
+        "checkJs": true,
+
+        "skipLibCheck": true, // Don't report errors in 3rd party definitions
+        "noEmitOnError": true,
+        "outDir": "./build",
+        "rootDir": "./src/",
         "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "module": "Node16",
+        "moduleResolution": "node16",
+        "sourceMap": true, // required for debug
+        "inlineSources": true, // required for debug
+
+        "strict": true,
+        "target": "es2022",
+        "inlineSourceMap": false,
+        "useUnknownInCatchVariables": false,
+        "types": ["node", "@iobroker/types"]
     },
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*.*", "src/**/*.d.*"],
+    "exclude": ["build/**", "node_modules/**", "src-admin/**"]
 }

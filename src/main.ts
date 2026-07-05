@@ -1,7 +1,23 @@
-import { Adapter, type AdapterOptions } from '@iobroker/adapter-core';
+import { Adapter, getAbsoluteInstanceDataDir, type AdapterOptions } from '@iobroker/adapter-core';
 import { Satellite, loadConfig, type SatelliteState } from '@iobroker/assistant-satellite';
+import { execFile } from 'node:child_process';
+import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import { promisify } from 'node:util';
+
+const execFileAsync = promisify(execFile);
+
+/** Built-in wake words shipped as ONNX by the satellite package (mirrors its `WAKEWORDS`). */
+const BUILTIN_WAKEWORDS = ['hey_jarvis', 'alexa', 'hey_mycroft', 'hey_rhasspy'];
+/** Support files that live next to the wake-word models but are not wake words themselves. */
+const MODEL_SUPPORT_FILES = ['melspectrogram.onnx', 'embedding_model.onnx'];
+
+/** An option for an `autocompleteSendTo` field. */
+interface DeviceOption {
+    label: string;
+    value: string;
+}
 
 /** Adapter settings (mirrors io-package.json `native`). */
 interface AdapterConfig {
@@ -22,7 +38,6 @@ interface AdapterConfig {
     minRecordMs: number;
     maxRecordMs: number;
     preBufferChunks: number;
-    logLevel: 'info' | 'debug';
 }
 
 const ipToInt = (ip: string): number => ip.split('.').reduce((acc, o) => (acc << 8) + (Number(o) & 0xff), 0) >>> 0;
@@ -44,9 +59,9 @@ class AssistantSatellite extends Adapter {
         this.on('unload', this.onUnload.bind(this));
     }
 
-    /** Writable instance data dir (models download here). `getAbsoluteInstanceDataDir` lacks a type. */
+    /** Writable instance data dir (models download here). */
     private instanceDataDir(): string {
-        return (this as unknown as { getAbsoluteInstanceDataDir(): string }).getAbsoluteInstanceDataDir();
+        return getAbsoluteInstanceDataDir(this);
     }
 
     private async onReady(): Promise<void> {
@@ -59,7 +74,7 @@ class AssistantSatellite extends Adapter {
         }
 
         const cfg = loadConfig({
-            logLevel: c.logLevel || 'info',
+            logLevel: this.log.level === 'debug' || this.log.level === 'silly' ? 'debug' : 'info',
             device: this.namespace.replace('.', '-'), // e.g. assistant-satellite-0
             room: c.room || '',
             host,
@@ -81,7 +96,7 @@ class AssistantSatellite extends Adapter {
         this.satellite = new Satellite(cfg, {
             log: this.log,
             onStatus: (state: SatelliteState) => {
-                this.setStateAsync('status', { val: state, ack: true }).catch(e =>
+                this.setState('status', { val: state, ack: true }).catch(e =>
                     this.log.error(`Cannot set status: ${e}`),
                 );
             },
@@ -89,10 +104,10 @@ class AssistantSatellite extends Adapter {
 
         try {
             await this.satellite.start();
-            await this.setStateAsync('info.connection', { val: true, ack: true });
+            await this.setState('info.connection', { val: true, ack: true });
         } catch (e) {
             this.log.error(`Could not start satellite: ${(e as Error).message}`);
-            await this.setStateAsync('info.connection', { val: false, ack: true });
+            await this.setState('info.connection', { val: false, ack: true });
         }
     }
 
@@ -182,8 +197,24 @@ class AssistantSatellite extends Adapter {
         return remote[0].address; // fallback: first IPv4 of the assistant host
     }
 
-    /** Admin config: list available ioBroker.assistant instances for the instance dropdown. */
+    /** Admin config message handler (autocomplete/dropdown data sources). */
     private async onMessage(obj: ioBroker.Message): Promise<void> {
+        if (obj?.command === 'getMicDevices' || obj?.command === 'getSpeakerDevices') {
+            const kind = obj.command === 'getMicDevices' ? 'mic' : 'speaker';
+            const backend = (obj.message as { backend?: string } | undefined)?.backend || 'auto';
+            const options = await this.listAudioDevices(kind, backend);
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, options, obj.callback);
+            }
+            return;
+        }
+        if (obj?.command === 'getWakewords') {
+            const options = await this.listWakewords();
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, options, obj.callback);
+            }
+            return;
+        }
         if (obj?.command === 'getAssistantInstances') {
             const options: { label: string; value: string }[] = [];
             try {
@@ -208,10 +239,175 @@ class AssistantSatellite extends Adapter {
         }
     }
 
+    /** Resolve 'auto' → alsa on Linux, ffmpeg elsewhere (mirrors the satellite's `resolveBackend`). */
+    private effectiveBackend(pref: string): 'alsa' | 'ffmpeg' {
+        if (pref === 'alsa' || pref === 'ffmpeg') {
+            return pref;
+        }
+        return process.platform === 'linux' ? 'alsa' : 'ffmpeg';
+    }
+
+    /**
+     * Run a listing CLI and return combined stdout+stderr. `arecord`/`ffmpeg` print their device list to
+     * stderr and exit non-zero, so a non-zero exit is not treated as failure — only a missing binary is.
+     */
+    private async runCli(cmd: string, args: string[]): Promise<string> {
+        try {
+            const { stdout, stderr } = await execFileAsync(cmd, args, { timeout: 5000 });
+            return `${stdout}\n${stderr}`;
+        } catch (e) {
+            const err = e as { stdout?: string; stderr?: string; code?: string };
+            if (err.code === 'ENOENT') {
+                throw new Error(`${cmd} is not installed`);
+            }
+            return `${err.stdout || ''}\n${err.stderr || ''}`;
+        }
+    }
+
+    /** Parse `arecord -l` / `aplay -l` into `plughw:card,device` options. */
+    private parseAlsaDevices(output: string): DeviceOption[] {
+        const options: DeviceOption[] = [];
+        const re = /^card (\d+):\s*(.+?)\s*\[(.+?)],\s*device (\d+):\s*(.+?)\s*\[(.+?)]/;
+        for (const line of output.split('\n')) {
+            const m = re.exec(line.trim());
+            if (m) {
+                const value = `plughw:${m[1]},${m[4]}`;
+                options.push({ value, label: `${value} — ${m[3]}` });
+            }
+        }
+        return options;
+    }
+
+    /** Parse `ffmpeg -list_devices` dshow output (Windows) into audio-input device names. */
+    private parseDshowDevices(output: string): DeviceOption[] {
+        const lines = output.split('\n');
+        const options: DeviceOption[] = [];
+        // Newer ffmpeg tags each line: `"Mic (Realtek)" (audio)`.
+        for (const line of lines) {
+            const m = /"([^"]+)"\s*\(audio\)/.exec(line);
+            if (m) {
+                options.push({ value: m[1], label: m[1] });
+            }
+        }
+        if (options.length) {
+            return options;
+        }
+        // Older ffmpeg: an "audio devices" section header, then quoted names (skip "Alternative name").
+        let inAudio = false;
+        for (const line of lines) {
+            if (/audio devices/i.test(line)) {
+                inAudio = true;
+                continue;
+            }
+            if (/video devices/i.test(line)) {
+                inAudio = false;
+                continue;
+            }
+            if (!inAudio || /Alternative name/i.test(line)) {
+                continue;
+            }
+            const m = /"([^"]+)"/.exec(line);
+            if (m) {
+                options.push({ value: m[1], label: m[1] });
+            }
+        }
+        return options;
+    }
+
+    /** Parse `ffmpeg -f avfoundation -list_devices` output (macOS); the value is the device index. */
+    private parseAvfoundationDevices(output: string): DeviceOption[] {
+        const options: DeviceOption[] = [];
+        let inAudio = false;
+        for (const line of output.split('\n')) {
+            if (/audio devices/i.test(line)) {
+                inAudio = true;
+                continue;
+            }
+            if (/video devices/i.test(line)) {
+                inAudio = false;
+                continue;
+            }
+            if (!inAudio) {
+                continue;
+            }
+            const m = /\[(\d+)]\s*(.+)$/.exec(line);
+            if (m) {
+                options.push({ value: m[1], label: `[${m[1]}] ${m[2].trim()}` });
+            }
+        }
+        return options;
+    }
+
+    /**
+     * List microphone / speaker devices available on this host via CLI, honouring the chosen backend.
+     * Always offers 'default' first; the field is freeSolo so anything can still be typed by hand.
+     */
+    private async listAudioDevices(kind: 'mic' | 'speaker', backendPref: string): Promise<DeviceOption[]> {
+        const backend = this.effectiveBackend(backendPref);
+        const options: DeviceOption[] = [{ value: 'default', label: 'default (system default)' }];
+        try {
+            if (backend === 'alsa') {
+                const tool = kind === 'mic' ? 'arecord' : 'aplay';
+                options.push(...this.parseAlsaDevices(await this.runCli(tool, ['-l'])));
+            } else if (process.platform === 'win32') {
+                // dshow enumerates capture devices only; there is no CLI playback-device list.
+                if (kind === 'mic') {
+                    const out = await this.runCli('ffmpeg', [
+                        '-hide_banner',
+                        '-list_devices',
+                        'true',
+                        '-f',
+                        'dshow',
+                        '-i',
+                        'dummy',
+                    ]);
+                    options.push(...this.parseDshowDevices(out));
+                }
+            } else if (process.platform === 'darwin') {
+                // avfoundation enumerates capture devices only.
+                if (kind === 'mic') {
+                    const out = await this.runCli('ffmpeg', [
+                        '-hide_banner',
+                        '-f',
+                        'avfoundation',
+                        '-list_devices',
+                        'true',
+                        '-i',
+                        '',
+                    ]);
+                    options.push(...this.parseAvfoundationDevices(out));
+                }
+            } else {
+                // ffmpeg on Linux uses ALSA device names — reuse the ALSA listing.
+                const tool = kind === 'mic' ? 'arecord' : 'aplay';
+                options.push(...this.parseAlsaDevices(await this.runCli(tool, ['-l'])));
+            }
+        } catch (e) {
+            this.log.warn(`Cannot list ${kind} devices (${backend}): ${(e as Error).message}`);
+        }
+        return options;
+    }
+
+    /** List selectable wake words: the built-in ONNX models plus any local `.onnx` in the models dir. */
+    private async listWakewords(): Promise<DeviceOption[]> {
+        const options: DeviceOption[] = BUILTIN_WAKEWORDS.map(v => ({ value: v, label: `${v} (built-in)` }));
+        try {
+            const dir = path.join(this.instanceDataDir(), 'models');
+            for (const file of await fs.readdir(dir)) {
+                if (file.endsWith('.onnx') && !MODEL_SUPPORT_FILES.includes(file)) {
+                    options.push({ value: path.join(dir, file), label: `${file} (local)` });
+                }
+            }
+        } catch {
+            // models dir may not exist yet — built-ins are enough
+        }
+        return options;
+    }
+
     private async onUnload(callback: () => void): Promise<void> {
         try {
             await this.satellite?.stop();
-            await this.setStateAsync('info.connection', { val: false, ack: true });
+            await this.setState('info.connection', { val: false, ack: true });
         } catch {
             // ignore
         } finally {
