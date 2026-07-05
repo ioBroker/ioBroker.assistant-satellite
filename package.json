@@ -1,54 +1,54 @@
 {
-    "name": "iobroker.assistant-satellite",
-    "version": "0.0.1",
-    "description": "ioBroker adapter that runs a voice satellite for ioBroker.assistant on this host (wake word + mic streaming + TTS playback). Thin wrapper around @iobroker/assistant-satellite.",
-    "author": "ioBroker",
-    "license": "MIT",
-    "keywords": [
-        "ioBroker",
-        "assistant",
-        "voice",
-        "satellite",
-        "wakeword",
-        "openwakeword"
-    ],
-    "main": "build/main.js",
-    "engines": {
-        "node": ">=22"
-    },
-    "dependencies": {
-        "@iobroker/adapter-core": "^3.4.1",
-        "@iobroker/assistant-satellite": "^0.0.2"
-    },
-    "devDependencies": {
-        "@alcalzone/release-script": "^5.2.1",
-        "@alcalzone/release-script-plugin-iobroker": "^5.2.0",
-        "@alcalzone/release-script-plugin-license": "^5.2.0",
-        "@iobroker/eslint-config": "^2.3.4",
-        "@types/node": "^20.19.43",
-        "typescript": "~6.0.3"
-    },
-    "scripts": {
-        "build": "tsc -p tsconfig.json",
-        "prepublishOnly": "npm run build",
-        "test:integration": "echo \"no tests yet\" && exit 0",
-        "test:package": "mocha test/testPackageFiles.ts --exit",
-        "test": "echo \"no tests yet\" && exit 0",
-        "lint": "eslint -c eslint.config.mjs",
-        "release-patch": "release-script patch --yes",
-        "release-minor": "release-script minor --yes",
-        "release-major": "release-script major --yes",
-        "release": "release-script",
-        "update-packages": "npx -y npm-check-updates --upgrade"
-    },
-    "files": [
-        "admin/",
-        "build/",
-        "io-package.json",
-        "LICENSE"
-    ],
-    "bugs": {
-        "url": "https://github.com/ioBroker/ioBroker.assistant-satellite/issues"
-    },
-    "homepage": "https://github.com/ioBroker/ioBroker.assistant-satellite"
+  "name": "iobroker.assistant-satellite",
+  "version": "0.0.2",
+  "description": "ioBroker adapter that runs a voice satellite for ioBroker.assistant on this host (wake word + mic streaming + TTS playback). Thin wrapper around @iobroker/assistant-satellite.",
+  "author": "ioBroker",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "assistant",
+    "voice",
+    "satellite",
+    "wakeword",
+    "openwakeword"
+  ],
+  "main": "build/main.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.4.1",
+    "@iobroker/assistant-satellite": "^0.0.2"
+  },
+  "devDependencies": {
+    "@alcalzone/release-script": "^5.2.1",
+    "@alcalzone/release-script-plugin-iobroker": "^5.2.0",
+    "@alcalzone/release-script-plugin-license": "^5.2.0",
+    "@iobroker/eslint-config": "^2.3.4",
+    "@types/node": "^20.19.43",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build",
+    "test:integration": "echo \"no tests yet\" && exit 0",
+    "test:package": "mocha test/testPackageFiles.ts --exit",
+    "test": "echo \"no tests yet\" && exit 0",
+    "lint": "eslint -c eslint.config.mjs",
+    "release-patch": "release-script patch --yes",
+    "release-minor": "release-script minor --yes",
+    "release-major": "release-script major --yes",
+    "release": "release-script",
+    "update-packages": "npx -y npm-check-updates --upgrade"
+  },
+  "files": [
+    "admin/",
+    "build/",
+    "io-package.json",
+    "LICENSE"
+  ],
+  "bugs": {
+    "url": "https://github.com/ioBroker/ioBroker.assistant-satellite/issues"
+  },
+  "homepage": "https://github.com/ioBroker/ioBroker.assistant-satellite"
 }
