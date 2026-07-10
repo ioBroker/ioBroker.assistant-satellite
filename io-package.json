@@ -84,7 +84,7 @@
     "wakewordModel2": "",
     "wakewordModel3": "",
     "wakewordUpload": "",
-    "followUp": false,
+    "followUp": true,
     "followUpSeconds": 6,
     "wakewordThreshold": 0.5,
     "silenceThreshold": 300,
