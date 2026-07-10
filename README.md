@@ -28,6 +28,20 @@ Install the adapter, add an instance, then in its settings:
 On first start the OpenWakeWord models download into the instance data dir. Then say the wake word →
 speak → the answer is played back. The `status` state shows `idle` / `listening` / `processing` / `speaking`.
 
+## Volume, mute, Do-Not-Disturb
+
+These writable states drive the speaker's ALSA mixer, so they apply to answers, announcements and the
+beep alike (ALSA backend only; the mixer control is auto-detected on the speaker's card, or set it under
+**ALSA mixer control** if the wrong one is picked):
+
+- **`volume`** — 0–100 %
+- **`mute`** — silence the speaker
+- **`dnd`** — Do-Not-Disturb: **announcements are suppressed** (replies to your own questions still play)
+
+**Priority announcements:** if the announcement text (sent via the assistant's `tts.text` /
+`satellites.<id>.tts`) starts with **`!`**, the `!` is stripped and it plays **even when DND is on** —
+e.g. `!Water leak in the basement`.
+
 ## Changelog
 <!--
     Placeholder for the next version (at the beginning of the line):
@@ -36,6 +50,7 @@ speak → the answer is played back. The `status` state shows `idle` / `listenin
 ### **WORK IN PROGRESS**
 * (@GermanBluefox) Support of multiple wake-words
 * (@GermanBluefox) Added test of wake-words
+* Added `volume` / `mute` / `dnd` states (ALSA mixer); announcements starting with `!` bypass Do-Not-Disturb
 
 ### 0.0.2 (2026-07-05)
 * (@GermanBluefox) Initial commit

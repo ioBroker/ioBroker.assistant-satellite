@@ -6,7 +6,9 @@ import {
     probeWakeWord,
     type SatelliteState,
 } from '@iobroker/assistant-satellite';
-import { execFile } from 'node:child_process';
+// playPcm isn't re-exported from the package index (yet) — deep-import it (no `exports` map restricts this).
+import { playPcm } from '@iobroker/assistant-satellite/build/audio';
+import { execFile, type ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import * as os from 'node:os';
 import * as path from 'node:path';
@@ -16,6 +18,9 @@ const execFileAsync = promisify(execFile);
 
 /** Built-in wake words shipped as ONNX by the satellite package (mirrors its `WAKEWORDS`). */
 const BUILTIN_WAKEWORDS = ['hey_jarvis', 'alexa', 'hey_mycroft', 'hey_rhasspy'];
+/** Custom wake words shipped with the adapter (ONNX in `models/`). name → file; the external `.onnx.data`
+ *  weights sit next to it and are resolved automatically by onnxruntime. */
+const BUNDLED_WAKEWORDS: Record<string, string> = { io_broker: 'io_broker.onnx' };
 /** Support files that live next to the wake-word models but are not wake words themselves. */
 const MODEL_SUPPORT_FILES = ['melspectrogram.onnx', 'embedding_model.onnx'];
 
@@ -64,16 +69,24 @@ interface AdapterConfig {
     audioBackend: 'auto' | 'alsa' | 'ffmpeg';
     micDevice: string;
     speakerDevice: string;
+    /** ALSA mixer simple-control for volume/mute ('' = auto-detect on the speaker's card). */
+    mixerControl: string;
     wakewordModel: string;
     /** Optional additional wake words — the satellite triggers on any of them. */
     wakewordModel2: string;
     wakewordModel3: string;
+    /** Last file picked in the upload widget (uploads land in the instance meta storage). */
+    wakewordUpload: string;
     wakewordThreshold: number;
     silenceThreshold: number;
     silenceMs: number;
     minRecordMs: number;
     maxRecordMs: number;
     preBufferChunks: number;
+    /** Follow-up conversation mode: keep the mic open after a reply (no wake word needed). */
+    followUp: boolean;
+    /** Seconds to wait for a follow-up before returning to wake-word mode. */
+    followUpSeconds: number;
 }
 
 const ipToInt = (ip: string): number => ip.split('.').reduce((acc, o) => (acc << 8) + (Number(o) & 0xff), 0) >>> 0;
@@ -89,11 +102,18 @@ class AssistantSatellite extends Adapter {
     private satellite: Satellite | null = null;
     /** ioBroker-transport listener (no UDP); used when transport = 'ioBroker'. */
     private localListener: LocalListener | null = null;
+    /** Heartbeat timer that keeps the satellite registered/alive on the assistant (ioBroker transport). */
+    private heartbeat: ioBroker.Interval | null = null;
+    /** Currently playing announcement (so a new one / barge-in can stop it). */
+    private announcePlayback: { proc: ChildProcess } | null = null;
+    /** Cached ALSA mixer simple-control name (auto-detected once). */
+    private mixerControlCache: string | null = null;
 
     public constructor(options: Partial<AdapterOptions> = {}) {
         super({ ...options, name: 'assistant-satellite' });
         this.on('ready', this.onReady.bind(this));
         this.on('message', this.onMessage.bind(this));
+        this.on('stateChange', this.onStateChange.bind(this));
         this.on('unload', this.onUnload.bind(this));
     }
 
@@ -102,11 +122,117 @@ class AssistantSatellite extends Adapter {
         return getAbsoluteInstanceDataDir(this);
     }
 
+    /**
+     * Copy user-uploaded `.onnx` models from the instance meta storage (jsonConfig upload widget) to the
+     * filesystem models dir, so the core lib can load them by path and they appear in the wake-word
+     * dropdown (`listWakewords` scans that dir). Idempotent — overwrites to pick up re-uploads.
+     */
+    private async syncUploadedModels(): Promise<void> {
+        const dir = path.join(this.instanceDataDir(), 'models');
+        let entries: { file: string; isDir: boolean }[];
+        try {
+            entries = (await this.readDirAsync(this.namespace, '')) as { file: string; isDir: boolean }[];
+        } catch {
+            return; // nothing uploaded yet
+        }
+        const models = entries.filter(e => !e.isDir && e.file.endsWith('.onnx'));
+        if (!models.length) {
+            return;
+        }
+        await fs.mkdir(dir, { recursive: true });
+        for (const e of models) {
+            try {
+                const res = await this.readFileAsync(this.namespace, e.file);
+                const data =
+                    res && typeof res === 'object' && 'file' in res
+                        ? (res as { file: Buffer | string }).file
+                        : (res as unknown as Buffer | string);
+                await fs.writeFile(path.join(dir, e.file), Buffer.isBuffer(data) ? data : Buffer.from(data, 'binary'));
+                this.log.debug(`Synced uploaded wake-word model: ${e.file}`);
+            } catch (err) {
+                this.log.warn(`Could not sync uploaded model ${e.file}: ${(err as Error).message}`);
+            }
+        }
+    }
+
+    // ── Volume / mute via the ALSA mixer of the speaker's card (ALSA backend only) ───────────────────
+
+    /** ALSA card number from the speaker device (`plughw:2,0` → "2"); null → default card. */
+    private mixerCard(): string | null {
+        const m = (this.config.speakerDevice || '').trim().match(/^(?:plug)?hw:(\d+)/i);
+        return m ? m[1] : null;
+    }
+
+    /** The mixer simple-control to drive: config override, else the first sensible playback control. */
+    private async detectMixerControl(card: string | null): Promise<string | null> {
+        if (this.config.mixerControl?.trim()) {
+            return this.config.mixerControl.trim();
+        }
+        if (this.mixerControlCache) {
+            return this.mixerControlCache;
+        }
+        try {
+            const { stdout } = await execFileAsync('amixer', [...(card ? ['-c', card] : []), 'scontrols']);
+            const names = [...stdout.matchAll(/Simple mixer control '([^']+)'/g)].map(x => x[1]);
+            const preferred = ['Master', 'PCM', 'Speaker', 'Headphone', 'Playback'];
+            this.mixerControlCache = preferred.find(p => names.includes(p)) || names[0] || null;
+        } catch {
+            this.mixerControlCache = null;
+        }
+        return this.mixerControlCache;
+    }
+
+    /** Push the persisted volume/mute states to the ALSA mixer. */
+    private async applyVolume(): Promise<void> {
+        if (this.config.audioBackend === 'ffmpeg') {
+            return; // amixer is ALSA-only
+        }
+        const card = this.mixerCard();
+        const control = await this.detectMixerControl(card);
+        if (!control) {
+            this.log.debug('No ALSA mixer control found — volume control unavailable on this device.');
+            return;
+        }
+        const vol = Math.max(0, Math.min(100, Math.round(Number((await this.getStateAsync('volume'))?.val ?? 100))));
+        const muted = !!(await this.getStateAsync('mute'))?.val;
+        try {
+            await execFileAsync('amixer', [
+                ...(card ? ['-c', card] : []),
+                'sset',
+                control,
+                `${vol}%`,
+                muted ? 'mute' : 'unmute',
+            ]);
+            this.log.debug(`Volume set: ${control} ${vol}%${muted ? ' (muted)' : ''}`);
+        } catch (e) {
+            this.log.warn(`amixer failed for control '${control}': ${(e as Error).message}`);
+        }
+    }
+
+    private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
+        if (!state || state.ack) {
+            return; // only react to user/program writes
+        }
+        if (id.endsWith('.volume') || id.endsWith('.mute')) {
+            // Confirm the write, then push it to the mixer.
+            await this.setStateAsync(id.endsWith('.mute') ? 'mute' : 'volume', { val: state.val, ack: true });
+            await this.applyVolume();
+        }
+    }
+
+    /** Resolve a wake-word value for the core lib: a bundled name → its shipped file path; a built-in
+     *  openWakeWord name / URL / local path passes through unchanged. */
+    private resolveWakeword(name: string): string {
+        const file = BUNDLED_WAKEWORDS[name];
+        return file ? path.join(__dirname, '..', 'models', file) : name;
+    }
+
     /** Combine the up-to-three wake-word fields into the comma-separated list the core lib parses. */
     private joinWakewords(c: AdapterConfig): string {
         const list = [c.wakewordModel, c.wakewordModel2, c.wakewordModel3]
             .map(s => (s || '').trim())
-            .filter(Boolean);
+            .filter(Boolean)
+            .map(w => this.resolveWakeword(w));
         return list.length ? list.join(',') : 'hey_jarvis';
     }
 
@@ -114,7 +240,8 @@ class AssistantSatellite extends Adapter {
     private joinTestWakewords(msg: WakeTestMsg, c: AdapterConfig): string {
         const fromMsg = [msg.wakewordModel, msg.wakewordModel2, msg.wakewordModel3]
             .map(s => (s || '').trim())
-            .filter(Boolean);
+            .filter(Boolean)
+            .map(w => this.resolveWakeword(w));
         return fromMsg.length ? fromMsg.join(',') : this.joinWakewords(c);
     }
 
@@ -139,6 +266,9 @@ class AssistantSatellite extends Adapter {
             minRecordMs: c.minRecordMs || 800,
             maxRecordMs: c.maxRecordMs || 8000,
             preBufferChunks: c.preBufferChunks ?? 5,
+            followUp: !!c.followUp,
+            followUpWindowMs: (c.followUpSeconds || 6) * 1000,
+            maxFollowUps: 4,
         });
     }
 
@@ -177,6 +307,7 @@ class AssistantSatellite extends Adapter {
                 format: 'pcm',
                 sampleRate,
                 source: this.namespace.replace('.', '-'),
+                room: this.config.room || '',
             })) as { text?: string; answer?: string; audio?: string; sampleRate?: number; error?: string };
             if (res?.error) {
                 this.log.warn(`Assistant error: ${res.error}`);
@@ -198,11 +329,61 @@ class AssistantSatellite extends Adapter {
         }
     }
 
+    /** Register/heartbeat with the assistant (ioBroker transport) so it lists us and can push announcements. */
+    private registerWithAssistant(state: SatelliteState | 'offline'): void {
+        const inst = this.config.assistantInstance;
+        if (!inst) {
+            return;
+        }
+        this.sendTo(inst, 'registerSatellite', {
+            device: this.namespace.replace('.', '-'),
+            room: this.config.room || '',
+            state,
+        });
+    }
+
+    /** Play a pushed announcement (`announce` message from the assistant): raw 16-bit mono PCM (base64). */
+    private async playAnnouncement(msg: { audio?: string; sampleRate?: number; priority?: boolean }): Promise<void> {
+        if (!msg?.audio) {
+            return;
+        }
+        // Do-Not-Disturb suppresses pushed announcements — except priority ones (text started with "!").
+        if (!msg.priority && (await this.getStateAsync('dnd'))?.val) {
+            this.log.debug('Announcement suppressed (Do-Not-Disturb).');
+            return;
+        }
+        try {
+            // Stop any announcement already playing so the newest one wins.
+            this.announcePlayback?.proc.kill('SIGKILL');
+            const pcm = Buffer.from(msg.audio, 'base64');
+            const backend = this.effectiveBackend(this.config.audioBackend || 'auto');
+            const device = this.config.speakerDevice || 'default';
+            await this.setState('status', { val: 'speaking', ack: true }).catch(() => {});
+            const { proc, done } = playPcm(pcm, msg.sampleRate || 24000, backend, device, this.log);
+            this.announcePlayback = { proc };
+            await done;
+        } catch (e) {
+            this.log.warn(`Announcement playback failed: ${(e as Error).message}`);
+        } finally {
+            this.announcePlayback = null;
+            await this.setState('status', { val: 'idle', ack: true }).catch(() => {});
+        }
+    }
+
     private async onReady(): Promise<void> {
         const c = this.config;
+        await this.syncUploadedModels(); // materialize any uploaded .onnx models to the FS models dir
+        // Volume/mute drive the ALSA mixer of the speaker's card — apply the persisted value on start.
+        await this.subscribeStatesAsync('volume');
+        await this.subscribeStatesAsync('mute');
+        await this.applyVolume();
         if ((c.transport || 'ioBroker') === 'ioBroker') {
             this.log.info(`ioBroker transport → assistant '${c.assistantInstance || '-'}' (no UDP).`);
             await this.startLocalListener();
+            // Register with the assistant so we show up under assistant.0.satellites and can receive
+            // pushed announcements; refresh periodically as a heartbeat.
+            this.registerWithAssistant('idle');
+            this.heartbeat = this.setInterval(() => this.registerWithAssistant('idle'), 30000) || null;
             return;
         }
         const { host, port } = await this.resolveAssistant();
@@ -239,6 +420,7 @@ class AssistantSatellite extends Adapter {
      */
     private async testWakeWord(msg: WakeTestMsg): Promise<WakeTestResult> {
         const c = this.config;
+        await this.syncUploadedModels(); // so an uploaded model can be tested right away
         const seconds = Number(msg.seconds) || 15;
         const cfg = loadConfig({
             device: this.namespace.replace('.', '-'),
@@ -392,8 +574,18 @@ class AssistantSatellite extends Adapter {
         return remote[0].address; // fallback: first IPv4 of the assistant host
     }
 
-    /** Admin config message handler (autocomplete/dropdown data sources). */
+    /** Admin config message handler (autocomplete/dropdown data sources) + pushed announcements. */
     private async onMessage(obj: ioBroker.Message): Promise<void> {
+        // Announcement pushed by the assistant (tts.text / per-satellite tts) → play it locally.
+        if (obj?.command === 'announce') {
+            await this.playAnnouncement(
+                (obj.message || {}) as { audio?: string; sampleRate?: number; priority?: boolean },
+            );
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, { ok: true }, obj.callback);
+            }
+            return;
+        }
         if (obj?.command === 'getMicDevices' || obj?.command === 'getSpeakerDevices') {
             const kind = obj.command === 'getMicDevices' ? 'mic' : 'speaker';
             const backend = (obj.message as { backend?: string } | undefined)?.backend || 'auto';
@@ -592,7 +784,11 @@ class AssistantSatellite extends Adapter {
 
     /** List selectable wake words: the built-in ONNX models plus any local `.onnx` in the models dir. */
     private async listWakewords(): Promise<DeviceOption[]> {
-        const options: DeviceOption[] = BUILTIN_WAKEWORDS.map(v => ({ value: v, label: `${v} (built-in)` }));
+        await this.syncUploadedModels(); // surface freshly-uploaded models in the dropdown
+        const options: DeviceOption[] = [
+            ...BUILTIN_WAKEWORDS.map(v => ({ value: v, label: `${v} (built-in)` })),
+            ...Object.keys(BUNDLED_WAKEWORDS).map(v => ({ value: v, label: `${v} (bundled)` })),
+        ];
         try {
             const dir = path.join(this.instanceDataDir(), 'models');
             for (const file of await fs.readdir(dir)) {
@@ -608,6 +804,12 @@ class AssistantSatellite extends Adapter {
 
     private async onUnload(callback: () => void): Promise<void> {
         try {
+            if (this.heartbeat) {
+                this.clearInterval(this.heartbeat);
+                this.heartbeat = null;
+            }
+            this.announcePlayback?.proc.kill('SIGKILL');
+            this.registerWithAssistant('offline'); // tell the assistant we're gone
             await this.satellite?.stop();
             await this.localListener?.stop();
             await this.setState('info.connection', { val: false, ack: true });

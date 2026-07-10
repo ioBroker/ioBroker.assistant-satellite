@@ -79,9 +79,13 @@
     "audioBackend": "auto",
     "micDevice": "default",
     "speakerDevice": "default",
+    "mixerControl": "",
     "wakewordModel": "hey_jarvis",
     "wakewordModel2": "",
     "wakewordModel3": "",
+    "wakewordUpload": "",
+    "followUp": false,
+    "followUpSeconds": 6,
     "wakewordThreshold": 0.5,
     "silenceThreshold": 300,
     "silenceMs": 800,
@@ -91,6 +95,15 @@
   },
   "objects": [],
   "instanceObjects": [
+    {
+      "_id": "",
+      "type": "meta",
+      "common": {
+        "name": "Uploaded wake-word models",
+        "type": "meta.user"
+      },
+      "native": {}
+    },
     {
       "_id": "info",
       "type": "channel",
@@ -122,6 +135,48 @@
         "read": true,
         "write": false,
         "def": "idle"
+      },
+      "native": {}
+    },
+    {
+      "_id": "volume",
+      "type": "state",
+      "common": {
+        "name": "Speaker volume (0–100 %)",
+        "type": "number",
+        "role": "level.volume",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "read": true,
+        "write": true,
+        "def": 100
+      },
+      "native": {}
+    },
+    {
+      "_id": "mute",
+      "type": "state",
+      "common": {
+        "name": "Mute speaker",
+        "type": "boolean",
+        "role": "media.mute",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "dnd",
+      "type": "state",
+      "common": {
+        "name": "Do not disturb (suppress announcements)",
+        "type": "boolean",
+        "role": "switch.enable",
+        "read": true,
+        "write": true,
+        "def": false
       },
       "native": {}
     },
