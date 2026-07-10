@@ -295,7 +295,10 @@ class AssistantSatellite extends Adapter {
     }
 
     /** Send a recorded utterance to the assistant and return the reply audio to play, or null. */
-    private async queryAssistant(pcm: Buffer, sampleRate: number): Promise<{ pcm: Buffer; sampleRate: number } | null> {
+    private async queryAssistant(
+        pcm: Buffer,
+        sampleRate: number,
+    ): Promise<{ pcm: Buffer; sampleRate: number; listen?: boolean } | null> {
         const inst = this.config.assistantInstance;
         if (!inst) {
             this.log.warn('No assistant instance selected — cannot send the query.');
@@ -308,7 +311,14 @@ class AssistantSatellite extends Adapter {
                 sampleRate,
                 source: this.namespace.replace('.', '-'),
                 room: this.config.room || '',
-            })) as { text?: string; answer?: string; audio?: string; sampleRate?: number; error?: string };
+            })) as {
+                text?: string;
+                answer?: string;
+                audio?: string;
+                sampleRate?: number;
+                listen?: boolean;
+                error?: string;
+            };
             if (res?.error) {
                 this.log.warn(`Assistant error: ${res.error}`);
                 return null;
@@ -319,8 +329,12 @@ class AssistantSatellite extends Adapter {
             if (res?.answer) {
                 this.log.info(`A: ${res.answer}`);
             }
+            // The assistant asks us to keep listening (it asked a question) → open the mic for the answer.
+            if (res?.listen) {
+                this.log.info('Mic ON — assistant is waiting for an answer (opening mic, no wake word needed).');
+            }
             if (res?.audio) {
-                return { pcm: Buffer.from(res.audio, 'base64'), sampleRate: res.sampleRate || 24000 };
+                return { pcm: Buffer.from(res.audio, 'base64'), sampleRate: res.sampleRate || 24000, listen: !!res.listen };
             }
             return null;
         } catch (e) {
