@@ -18,8 +18,10 @@ const execFileAsync = promisify(execFile);
 
 /** Built-in wake words shipped as ONNX by the satellite package (mirrors its `WAKEWORDS`). */
 const BUILTIN_WAKEWORDS = ['hey_jarvis', 'alexa', 'hey_mycroft', 'hey_rhasspy'];
-/** Custom wake words shipped with the adapter (ONNX in `models/`). name → file; the external `.onnx.data`
- *  weights sit next to it and are resolved automatically by onnxruntime. */
+/**
+ * Custom wake words shipped with the adapter (ONNX in `models/`). name → file; the external `.onnx.data`
+ *  weights sit next to it and are resolved automatically by onnxruntime.
+ */
 const BUNDLED_WAKEWORDS: Record<string, string> = { io_broker: 'io_broker.onnx' };
 /** Support files that live next to the wake-word models but are not wake words themselves. */
 const MODEL_SUPPORT_FILES = ['melspectrogram.onnx', 'embedding_model.onnx'];
@@ -124,14 +126,14 @@ class AssistantSatellite extends Adapter {
 
     /**
      * Copy user-uploaded `.onnx` models from the instance meta storage (jsonConfig upload widget) to the
-     * filesystem models dir, so the core lib can load them by path and they appear in the wake-word
+     * filesystem models dir, so the core lib can load them by path, and they appear in the wake-word
      * dropdown (`listWakewords` scans that dir). Idempotent — overwrites to pick up re-uploads.
      */
     private async syncUploadedModels(): Promise<void> {
         const dir = path.join(this.instanceDataDir(), 'models');
         let entries: { file: string; isDir: boolean }[];
         try {
-            entries = (await this.readDirAsync(this.namespace, '')) as { file: string; isDir: boolean }[];
+            entries = await this.readDirAsync(this.namespace, '');
         } catch {
             return; // nothing uploaded yet
         }
@@ -220,8 +222,10 @@ class AssistantSatellite extends Adapter {
         }
     }
 
-    /** Resolve a wake-word value for the core lib: a bundled name → its shipped file path; a built-in
-     *  openWakeWord name / URL / local path passes through unchanged. */
+    /**
+     * Resolve a wake-word value for the core lib: a bundled name → its shipped file path; a built-in
+     *  openWakeWord name / URL / local path passes through unchanged.
+     */
     private resolveWakeword(name: string): string {
         const file = BUNDLED_WAKEWORDS[name];
         return file ? path.join(__dirname, '..', 'models', file) : name;
@@ -281,7 +285,9 @@ class AssistantSatellite extends Adapter {
         this.localListener = new LocalListener(cfg, {
             log: this.log,
             onStatus: (state: SatelliteState) => {
-                this.setState('status', { val: state, ack: true }).catch(e => this.log.error(`Cannot set status: ${e}`));
+                this.setState('status', { val: state, ack: true }).catch(e =>
+                    this.log.error(`Cannot set status: ${e}`),
+                );
             },
             onUtterance: (pcm, sampleRate) => this.queryAssistant(pcm, sampleRate),
         });
@@ -334,7 +340,11 @@ class AssistantSatellite extends Adapter {
                 this.log.info('Mic ON — assistant is waiting for an answer (opening mic, no wake word needed).');
             }
             if (res?.audio) {
-                return { pcm: Buffer.from(res.audio, 'base64'), sampleRate: res.sampleRate || 24000, listen: !!res.listen };
+                return {
+                    pcm: Buffer.from(res.audio, 'base64'),
+                    sampleRate: res.sampleRate || 24000,
+                    listen: !!res.listen,
+                };
             }
             return null;
         } catch (e) {
