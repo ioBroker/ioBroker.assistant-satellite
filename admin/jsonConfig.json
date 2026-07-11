@@ -158,7 +158,7 @@
             "type": "checkbox",
             "label": "Follow-up conversation (no wake word for replies)",
             "help": "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.",
-            "default": true,
+            "default": false,
             "sm": 8,
             "md": 5
         },
