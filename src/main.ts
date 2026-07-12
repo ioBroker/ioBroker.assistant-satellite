@@ -133,7 +133,7 @@ class AssistantSatellite extends Adapter {
         const dir = path.join(this.instanceDataDir(), 'models');
         let entries: { file: string; isDir: boolean }[];
         try {
-            entries = await this.readDirAsync(this.namespace, '');
+            entries = await this.readDirAsync(this.namespace, 'wakeWords/');
         } catch {
             return; // nothing uploaded yet
         }
