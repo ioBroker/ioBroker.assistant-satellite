@@ -14,19 +14,46 @@ admin UI). On a bare Pi without ioBroker, use the standalone package directly
 ## Requirements
 
 - A mic + speaker on the host
-- Audio backend (auto-selected): **Linux** → `alsa-utils` (`arecord`/`aplay`); **Windows/macOS** → `ffmpeg`
-- A running `ioBroker.assistant` instance with the Voice server enabled
+- Audio backend (auto-selected, or force it under **Audio backend**): **Linux** → `alsa-utils`
+  (`arecord`/`aplay`); **Windows/macOS** → `ffmpeg`
+- A running `ioBroker.assistant` instance (the satellite talks to it over the ioBroker message bus by default)
 
 ## Setup
 
-Install the adapter, add an instance, then in its settings:
+Install the adapter, add an instance, then configure it. The settings are grouped:
 
-- **Adapter host** — IP of the `ioBroker.assistant` host (`127.0.0.1` if the same box), port `7775`
-- **Microphone / speaker device** — e.g. `plughw:2,0` on a Pi (`arecord -l` to list)
-- **Wake word** — `hey_jarvis` (default), `alexa`, `hey_mycroft`, `hey_rhasspy`, or a custom `.onnx`
+**ioBroker.assistant server**
+- **Assistant instance** — pick the running `ioBroker.assistant` instance this satellite talks to
+- **Transport** — **ioBroker** (audio over the message bus, no UDP port, central STT/TTS — *recommended*)
+  or **UDP** (Hannah-style audio stream, ESP-compatible). With UDP, set the **Local listen port**
+  (default `7776`) and, if the wrong interface is auto-picked, a **Host IP override**.
+
+**Identity**
+- **Room** — assign the satellite to a room
+
+**Audio**
+- **Audio backend** — `Auto` / `ALSA` / `ffmpeg`
+- **Microphone / Speaker device** — e.g. `plughw:2,0` on a Pi (ALSA) or a dshow name / avfoundation index
+  (ffmpeg); `default` = system default. The device lists are read from this host (instance must be running).
+- **ALSA mixer control** — optional; only used by the `volume`/`mute` states (see below). Empty = auto-detect
+  on the speaker's card; set a name (e.g. `PCM`, `Master`, `Speaker`) if the wrong one is picked. ALSA only.
+
+**Wake word**
+- **Wake word model** — built-in `hey_jarvis` (default), `alexa`, `hey_mycroft`, `hey_rhasspy`, or a URL /
+  local `.onnx` path. You can configure up to **three** wake words — the satellite triggers on any of them.
+- **Threshold** — 0–1, lower = more sensitive.
+- **Upload a custom wake-word model** — upload a single self-contained `.onnx` (external-data `.onnx` +
+  `.onnx.data` is not supported), then pick it in a wake-word field above. Use the built-in **wake-word test**
+  to check detection live (the `test.*` states report score / peak / mic level while it runs).
+- **Follow-up conversation** — after an answer, keep the mic open for a short **follow-up window** so you can
+  continue ("…and the kitchen too") or answer a clarifying question without saying the wake word again.
+
+**Recording (advanced)** — silence detection and record-length tuning: **silence RMS threshold**,
+**silence (ms)**, **min / max record (ms)** and **pre-buffer chunks**.
 
 On first start the OpenWakeWord models download into the instance data dir. Then say the wake word →
-speak → the answer is played back. The `status` state shows `idle` / `listening` / `processing` / `speaking`.
+speak → the answer is played back. The `status` state shows `idle` / `listening` / `processing` / `speaking`,
+and `info.connection` reflects whether the satellite is registered with the assistant.
 
 ## Volume, mute, Do-Not-Disturb
 
@@ -50,6 +77,9 @@ e.g. `!Water leak in the basement`.
 ### **WORK IN PROGRESS**
 * (@GermanBluefox) Support of multiple wake-words
 * (@GermanBluefox) Added test of wake-words
+* (@GermanBluefox) Connect to the assistant by instance selection with a choice of transport (ioBroker message bus or UDP)
+* (@GermanBluefox) Added selectable audio backend (auto / ALSA / ffmpeg) and room assignment
+* (@GermanBluefox) Added follow-up conversation mode (continue without repeating the wake word)
 * Added `volume` / `mute` / `dnd` states (ALSA mixer); announcements starting with `!` bypass Do-Not-Disturb
 
 ### 0.0.2 (2026-07-05)
