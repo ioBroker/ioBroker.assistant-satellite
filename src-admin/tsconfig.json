@@ -8,6 +8,8 @@
         "esModuleInterop": false,
         "allowSyntheticDefaultImports": true,
         "strict": true,
+        "strictNullChecks": true,
+        "rootDir": "./src",
         "forceConsistentCasingInFileNames": true,
         "module": "ESNext",
         "moduleResolution": "Node",

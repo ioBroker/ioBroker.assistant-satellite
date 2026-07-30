@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button, LinearProgress, Paper, Typography, Alert } from '@mui/material';
 import { Mic as MicIcon, GraphicEq as ScoreIcon, CheckCircle as OkIcon } from '@mui/icons-material';
 import { ConfigGeneric, type ConfigGenericProps, type ConfigGenericState } from '@iobroker/json-config';
-import { I18n } from '@iobroker/adapter-react-v5';
+import { I18n } from '@iobroker/gui-components';
 
 // Register this component's translations so the `custom_asat_*` keys resolve.
 const translations: Record<string, Record<string, string>> = {};
