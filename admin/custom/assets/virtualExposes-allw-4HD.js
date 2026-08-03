@@ -1,0 +1,1 @@
+import{t as e}from"./virtual_mf-exposes___mfe_internal__ConfigCustomAssistantSatellite__customComponents_js-DFz6LTwb.js";export{e as default};

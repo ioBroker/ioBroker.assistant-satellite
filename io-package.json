@@ -1,9 +1,22 @@
 {
   "common": {
     "name": "assistant-satellite",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "title": "Assistant Satellite",
     "news": {
+      "0.1.2": {
+        "en": "Updated packages",
+        "de": "Aktualisierte Pakete",
+        "ru": "Обновлены пакеты",
+        "pt": "Pacotes atualizados",
+        "nl": "Bijgewerkte pakketten",
+        "fr": "Paquets mis à jour",
+        "it": "Pacchetti aggiornati",
+        "es": "Paquetes actualizados",
+        "pl": "Zaktualizowane pakiety",
+        "uk": "Оновлені пакети",
+        "zh-cn": "更新包"
+      }
     },
     "titleLang": {
       "en": "Assistant Satellite",
