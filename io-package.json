@@ -4,45 +4,6 @@
     "version": "0.1.1",
     "title": "Assistant Satellite",
     "news": {
-      "0.1.1": {
-        "en": "Updated packages",
-        "de": "Aktualisierte Pakete",
-        "ru": "Обновлены пакеты",
-        "pt": "Pacotes atualizados",
-        "nl": "Bijgewerkte pakketten",
-        "fr": "Paquets mis à jour",
-        "it": "Pacchetti aggiornati",
-        "es": "Paquetes actualizados",
-        "pl": "Zaktualizowane pakiety",
-        "uk": "Оновлені пакети",
-        "zh-cn": "更新包"
-      },
-      "0.1.0": {
-        "en": "Support of multiple wake-words\nAdded test of wake-words\nConnect to the assistant by instance selection with a choice of transport (ioBroker message bus or UDP)\nAdded selectable audio backend (auto / ALSA / ffmpeg) and room assignment\nAdded follow-up conversation mode (continue without repeating the wake word)\nAdded `volume` / `mute` / `dnd` states (ALSA mixer); announcements starting with `!` bypass Do-Not-Disturb",
-        "de": "Unterstützung mehrerer Aktivierungswörter\nTest der Aktivierungswörter hinzugefügt\nStellen Sie über die Instanzauswahl eine Verbindung zum Assistenten her und wählen Sie dabei das Transportprotokoll (ioBroker Message Bus oder UDP).\nWählbares Audio-Backend (Auto / ALSA / ffmpeg) und Raumzuweisung hinzugefügt.\nAnschlussgesprächsmodus hinzugefügt (Fortsetzung ohne Wiederholung des Aktivierungsworts)\nDie Zustände „Lautstärke“, „Stumm“ und „Nicht stören“ wurden hinzugefügt (ALSA-Mixer); Ansagen, die mit „!“ beginnen, umgehen den „Nicht stören“-Modus.",
-        "ru": "Поддержка нескольких ключевых слов для активации\nДобавлена проверка ключевых слов для активации.\nПодключитесь к помощнику, выбрав экземпляр и указав тип транспортного протокола (шина сообщений ioBroker или UDP).\nДобавлена возможность выбора аудиобэкенда (авто / ALSA / ffmpeg) и назначения помещения.\nДобавлен режим продолжения разговора (продолжение без повторения кодового слова).\nДобавлены состояния `громкость` / `отключение звука` / `не беспокоить` (микшер ALSA); объявления, начинающиеся с `!`, обходят режим «Не беспокоить».",
-        "pt": "Suporte a múltiplas palavras de ativação\nAdicionado teste de palavras-chave de ativação\nConecte-se ao assistente por meio da seleção de instância, escolhendo o meio de transporte (barramento de mensagens ioBroker ou UDP).\nAdicionada opção de backend de áudio selecionável (automático / ALSA / ffmpeg) e atribuição de sala.\nAdicionado modo de conversa subsequente (continuar sem repetir a palavra de ativação)\nAdicionados os estados `volume` / `mute` / `dnd` (mixer ALSA); anúncios que começam com `!` ignoram o modo Não Perturbe.",
-        "nl": "Ondersteuning voor meerdere activeringswoorden\nTest van activeringswoorden toegevoegd\nMaak verbinding met de assistent door een instantie te selecteren met een transportmethode naar keuze (ioBroker-berichtenbus of UDP).\nEr is een selecteerbare audio-backend toegevoegd (automatisch / ALSA / ffmpeg) en de mogelijkheid om ruimtes toe te wijzen.\nVervolggesprekmodus toegevoegd (doorgaan zonder het activeringswoord te herhalen)\nToegevoegde `volume` / `mute` / `dnd`-statussen (ALSA-mixer); aankondigingen die beginnen met `!` omzeilen de Niet-Storen-modus.",
-        "fr": "Prise en charge de plusieurs mots de réveil\nAjout d'un test des mots de réveil\nConnectez-vous à l'assistant par sélection d'instance avec un choix de transport (bus de messages ioBroker ou UDP).\nAjout d'un choix de moteur audio (auto / ALSA / ffmpeg) et d'une fonction d'attribution des salles\nAjout d'un mode de conversation de suivi (continuer sans répéter le mot d'activation)\nAjout des états `volume` / `mute` / `dnd` (mixeur ALSA) ; les annonces commençant par `!` ignorent le mode « Ne pas déranger ».",
-        "it": "Supporto di più parole di attivazione\nTest aggiunto delle parole di attivazione\nConnettiti all'assistente selezionando un'istanza con una scelta di trasporto (bus di messaggi ioBroker o UDP).\nAggiunta la possibilità di selezionare il backend audio (automatico / ALSA / ffmpeg) e l'assegnazione della stanza.\nAggiunta la modalità di conversazione di follow-up (continua senza ripetere la parola di attivazione)\nAggiunti gli stati `volume` / `mute` / `dnd` (mixer ALSA); gli annunci che iniziano con `!` ignorano la modalità Non disturbare",
-        "es": "Compatibilidad con múltiples palabras clave de activación\nSe agregó una prueba de palabras clave.\nConéctese al asistente mediante la selección de instancia con una opción de transporte (bus de mensajes ioBroker o UDP).\nSe agregó la opción de seleccionar el backend de audio (automático / ALSA / ffmpeg) y la asignación de sala.\nSe agregó el modo de conversación de seguimiento (continúa sin repetir la palabra de activación).\nSe agregaron los estados `volume` / `mute` / `dnd` (mezclador ALSA); los anuncios que comienzan con `!` omiten el modo No molestar.",
-        "pl": "Obsługa wielu słów wybudzających\nDodano test słów-pobudek\nPołącz się z asystentem poprzez wybór instancji z możliwością wyboru transportu (magistrala komunikatów ioBroker lub UDP)\nDodano możliwość wyboru zaplecza audio (auto/ALSA/ffmpeg) i przypisanie pomieszczenia\nDodano tryb kontynuacji rozmowy (kontynuuj bez powtarzania słowa wywołującego)\nDodano stany `głośność` / `wycisz` / `nie przeszkadzać` (mikser ALSA); komunikaty zaczynające się od `!` pomijają tryb Nie przeszkadzać",
-        "uk": "Підтримка кількох слів для пробудження\nДодано тест на слова-будки\nПідключення до помічника шляхом вибору екземпляра з вибором транспорту (шина повідомлень ioBroker або UDP)\nДодано вибір аудіобекенду (авто / ALSA / ffmpeg) та призначення кімнати\nДодано режим подальшої розмови (продовження без повторення слова пробудження)\nДодано стани `volume` / `mute` / `ndd` (мікшер ALSA); оголошення, що починаються з `!`, обходять режим \"Не турбувати\"",
-        "zh-cn": "支持多个唤醒词\n增加了唤醒词测试\n通过实例选择连接到助手，并选择传输方式（ioBroker 消息总线或 UDP）。\n新增可选音频后端（自动/ALSA/ffmpeg）和房间分配功能\n新增后续对话模式（无需重复唤醒词即可继续对话）\n新增 `volume` / `mute` / `dnd` 状态（ALSA 混音器）；以 `!` 开头的公告将绕过“请勿打扰”模式。"
-      },
-      "0.0.2": {
-        "en": "Initial commit",
-        "de": "Erster Commit",
-        "ru": "Первоначальный коммит",
-        "pt": "Confirmação inicial",
-        "nl": "Eerste commit",
-        "fr": "Engagement initial",
-        "it": "Inizial impegnato",
-        "es": "Compromiso inicial",
-        "pl": "Początkowe zatwierdzenie",
-        "uk": "Початковий коміт",
-        "zh-cn": "初始提交"
-      }
     },
     "titleLang": {
       "en": "Assistant Satellite",
