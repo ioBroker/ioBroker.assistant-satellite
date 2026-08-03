@@ -74,6 +74,9 @@ e.g. `!Water leak in the basement`.
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (@GermanBluefox) Updated packages
+
 ### 0.1.0 (2026-07-12)
 * (@GermanBluefox) Support of multiple wake-words
 * (@GermanBluefox) Added test of wake-words
