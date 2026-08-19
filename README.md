@@ -104,7 +104,7 @@ e.g. `!Water leak in the basement`.
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.1.3 (2026-08-19)
 * (@GermanBluefox) `volume` / `mute` now work on Windows too (default playback device via Core Audio)
 * (@GermanBluefox) On start the current host volume/mute is adopted into the states instead of being overwritten
 * (@GermanBluefox) Documented the `ffmpeg` / `ffplay` PATH requirement for Windows and macOS

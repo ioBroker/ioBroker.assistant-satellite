@@ -1,274 +1,296 @@
 {
-    "common": {
-        "name": "assistant-satellite",
-        "version": "0.1.2",
-        "news": {
-            "0.1.2": {
-                "en": "Updated packages",
-                "de": "Aktualisierte Pakete",
-                "ru": "Обновлены пакеты",
-                "pt": "Pacotes atualizados",
-                "nl": "Bijgewerkte pakketten",
-                "fr": "Paquets mis à jour",
-                "it": "Pacchetti aggiornati",
-                "es": "Paquetes actualizados",
-                "pl": "Zaktualizowane pakiety",
-                "uk": "Оновлені пакети",
-                "zh-cn": "更新包"
-            }
-        },
-        "titleLang": {
-            "en": "Assistant Satellite",
-            "de": "Assistent-Satellit",
-            "ru": "Сателлит ассистента",
-            "pt": "Satélite Assistente",
-            "nl": "Assistent-satelliet",
-            "fr": "Satellite Assistant",
-            "it": "Satellite Assistant",
-            "es": "Satélite asistente",
-            "pl": "Satelita asystenta",
-            "uk": "Супутник помічника",
-            "zh-cn": "助手卫星"
-        },
-        "desc": {
-            "en": "Voice satellite for ioBroker.assistant: wake word + microphone streaming + spoken reply, running on this host.",
-            "de": "Sprach-Satellit für ioBroker.assistant: Wake-Word + Mikrofon-Streaming + gesprochene Antwort, läuft auf diesem Host.",
-            "ru": "Голосовой сателлит для ioBroker.assistant: слово-активатор, стриминг микрофона и озвученный ответ на этом хосте.",
-            "pt": "Satélite de voz para ioBroker.assistant: palavra de ativação + streaming de microfone + resposta falada, executando neste host.",
-            "nl": "Spraaksatelliet voor ioBroker.assistant: wake word + microfoonstreaming + gesproken antwoord, uitgevoerd op deze host.",
-            "fr": "Satellite vocal pour ioBroker.assistant : mot d'activation + streaming du microphone + réponse parlée, exécuté sur cet hôte.",
-            "it": "Satellite vocale per ioBroker.assistant: parola di attivazione + streaming del microfono + risposta parlata, in esecuzione su questo host.",
-            "es": "Satélite de voz para ioBroker.assistant: palabra de activación + transmisión de micrófono + respuesta hablada, ejecutándose en este host.",
-            "pl": "Satelita głosowy dla ioBroker.assistant: słowo wybudzające + strumieniowanie mikrofonu + odpowiedź mówiona, działająca na tym hoście.",
-            "uk": "Голосовий супутник для ioBroker.assistant: слово-пробудження + потокове передавання мікрофона + усна відповідь, що працює на цьому хості.",
-            "zh-cn": "ioBroker.assistant 的语音卫星：唤醒词+麦克风流+口语回复，在此主机上运行。"
-        },
-        "authors": ["ioBroker"],
-        "licenseInformation": {
-            "license": "MIT",
-            "type": "free"
-        },
-        "tier": 3,
-        "keywords": ["assistant", "voice", "satellite", "wakeword"],
-        "platform": "Javascript/Node.js",
-        "main": "build/main.js",
-        "icon": "assistant-satellite.svg",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.assistant-satellite/main/admin/assistant-satellite.svg",
-        "readme": "https://github.com/ioBroker/ioBroker.assistant-satellite/blob/main/README.md",
-        "loglevel": "info",
-        "mode": "daemon",
-        "nogit": true,
-        "type": "communication",
-        "compact": false,
-        "connectionType": "local",
-        "dataSource": "push",
-        "adminUI": {
-            "config": "json"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=6.0.11"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=8.0.0"
-            }
-        ],
-        "osDependencies": {
-            "linux": ["alsa-utils"]
-        },
-        "messagebox": true
+  "common": {
+    "name": "assistant-satellite",
+    "version": "0.1.3",
+    "news": {
+      "0.1.3": {
+        "en": "`volume` / `mute` now work on Windows too (default playback device via Core Audio)\nOn start the current host volume/mute is adopted into the states instead of being overwritten\nDocumented the `ffmpeg` / `ffplay` PATH requirement for Windows and macOS",
+        "de": "`volume` / `mute` funktionieren jetzt auch unter Windows (Standard-Wiedergabegerät über Core Audio).\nBeim Start werden die aktuellen Host-Volume-/Stummschaltungseinstellungen in die Zustände übernommen, anstatt überschrieben zu werden.\nDie PATH-Anforderung für `ffmpeg` / `ffplay` unter Windows und macOS wurde dokumentiert.",
+        "ru": "Функции `volume` / `mute` теперь работают и в Windows (устройство воспроизведения по умолчанию — Core Audio).\nПри запуске текущее значение громкости/отключения звука хоста сохраняется в состояниях, а не перезаписывается.\nЗадокументировано требование к переменной PATH для `ffmpeg`/`ffplay` в Windows и macOS.",
+        "pt": "Os comandos `volume` e `mute` agora também funcionam no Windows (dispositivo de reprodução padrão via Core Audio).\nAo iniciar, o volume/mudo atual do host é adotado nos estados em vez de ser sobrescrito.\nDocumentamos a necessidade do PATH do `ffmpeg` / `ffplay` para Windows e macOS.",
+        "nl": "`volume` / `mute` werken nu ook op Windows (standaard afspeelapparaat via Core Audio).\nBij het opstarten wordt het huidige volume/dempen van de host overgenomen in de statussen in plaats van overschreven.\nDe PATH-vereisten voor `ffmpeg` / `ffplay` voor Windows en macOS zijn gedocumenteerd.",
+        "fr": "Les commandes `volume` et `mute` fonctionnent désormais également sous Windows (périphérique de lecture par défaut via Core Audio).\nAu démarrage, le volume/mode silencieux actuel de l'hôte est adopté dans les états au lieu d'être écrasé.\nDocumentation de la configuration requise pour `ffmpeg` / `ffplay` sous Windows et macOS",
+        "it": "I comandi `volume` e `mute` ora funzionano anche su Windows (dispositivo di riproduzione predefinito tramite Core Audio).\nAll'avvio, il volume/mute corrente dell'host viene adottato negli stati anziché essere sovrascritto.\nDocumentato il requisito PATH per `ffmpeg` / `ffplay` su Windows e macOS",
+        "es": "Las funciones `volume` / `mute` ahora también funcionan en Windows (dispositivo de reproducción predeterminado a través de Core Audio).\nAl iniciar, el volumen/silencio actual del host se adopta en los estados en lugar de ser sobrescrito.\nSe documentó el requisito de la variable de entorno PATH `ffmpeg` / `ffplay` para Windows y macOS.",
+        "pl": "`głośność` / `wycisz` działa teraz także w systemie Windows (domyślne urządzenie odtwarzające za pośrednictwem Core Audio)\nPodczas uruchamiania bieżąca głośność/wyciszenie hosta jest przejmowana do stanów zamiast być nadpisywana\nUdokumentowano wymagania ścieżki `ffmpeg` / `ffplay` dla systemów Windows i macOS",
+        "uk": "`volume` / `mute` тепер працюють і у Windows (пристрій відтворення за замовчуванням через Core Audio)\nПід час запуску поточний том/вимкнення звуку хоста приймається до станів, а не перезаписується.\nЗадокументовано вимогу `ffmpeg` / `ffplay` PATH для Windows та macOS",
+        "zh-cn": "现在 `volume` / `mute` 功能在 Windows 系统上也能正常工作了（默认播放设备为 Core Audio）。\n启动时，当前主机音量/静音设置会被保留并应用到新状态中，而不是被覆盖。\n记录了 Windows 和 macOS 系统中 `ffmpeg` / `ffplay` 的 PATH 要求"
+      },
+      "0.1.2": {
+        "en": "Updated packages",
+        "de": "Aktualisierte Pakete",
+        "ru": "Обновлены пакеты",
+        "pt": "Pacotes atualizados",
+        "nl": "Bijgewerkte pakketten",
+        "fr": "Paquets mis à jour",
+        "it": "Pacchetti aggiornati",
+        "es": "Paquetes actualizados",
+        "pl": "Zaktualizowane pakiety",
+        "uk": "Оновлені пакети",
+        "zh-cn": "更新包"
+      }
     },
-    "native": {
-        "assistantInstance": "",
-        "transport": "ioBroker",
-        "hostOverride": "",
-        "room": "",
-        "port": 7776,
-        "audioBackend": "auto",
-        "micDevice": "default",
-        "speakerDevice": "default",
-        "mixerControl": "",
-        "wakewordModel": "hey_jarvis",
-        "wakewordModel2": "",
-        "wakewordModel3": "",
-        "wakewordUpload": "",
-        "followUp": false,
-        "followUpSeconds": 6,
-        "wakewordThreshold": 0.5,
-        "silenceThreshold": 300,
-        "silenceMs": 800,
-        "minRecordMs": 800,
-        "maxRecordMs": 8000,
-        "preBufferChunks": 5
+    "titleLang": {
+      "en": "Assistant Satellite",
+      "de": "Assistent-Satellit",
+      "ru": "Сателлит ассистента",
+      "pt": "Satélite Assistente",
+      "nl": "Assistent-satelliet",
+      "fr": "Satellite Assistant",
+      "it": "Satellite Assistant",
+      "es": "Satélite asistente",
+      "pl": "Satelita asystenta",
+      "uk": "Супутник помічника",
+      "zh-cn": "助手卫星"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "",
-            "type": "meta",
-            "common": {
-                "name": "Uploaded wake-word models",
-                "type": "meta.user"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": "Information"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "name": "Satellite registered with the adapter",
-                "type": "boolean",
-                "role": "indicator.connected",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "status",
-            "type": "state",
-            "common": {
-                "name": "Satellite status (idle/listening/processing/speaking)",
-                "type": "string",
-                "role": "text",
-                "read": true,
-                "write": false,
-                "def": "idle"
-            },
-            "native": {}
-        },
-        {
-            "_id": "volume",
-            "type": "state",
-            "common": {
-                "name": "Speaker volume (0–100 %)",
-                "type": "number",
-                "role": "level.volume",
-                "unit": "%",
-                "min": 0,
-                "max": 100,
-                "read": true,
-                "write": true,
-                "def": 100
-            },
-            "native": {}
-        },
-        {
-            "_id": "mute",
-            "type": "state",
-            "common": {
-                "name": "Mute speaker",
-                "type": "boolean",
-                "role": "media.mute",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "dnd",
-            "type": "state",
-            "common": {
-                "name": "Do not disturb (suppress announcements)",
-                "type": "boolean",
-                "role": "switch.enable",
-                "read": true,
-                "write": true,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "test",
-            "type": "channel",
-            "common": {
-                "name": "Wake-word test"
-            },
-            "native": {}
-        },
-        {
-            "_id": "test.peakScore",
-            "type": "state",
-            "common": {
-                "name": "Peak wake-word score during the last test",
-                "type": "number",
-                "role": "value",
-                "min": 0,
-                "max": 1,
-                "read": true,
-                "write": false,
-                "def": 0
-            },
-            "native": {}
-        },
-        {
-            "_id": "test.detected",
-            "type": "state",
-            "common": {
-                "name": "Wake word detected during the last test",
-                "type": "boolean",
-                "role": "indicator",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "test.score",
-            "type": "state",
-            "common": {
-                "name": "Live wake-word score during the test",
-                "type": "number",
-                "role": "value",
-                "min": 0,
-                "max": 1,
-                "read": true,
-                "write": false,
-                "def": 0
-            },
-            "native": {}
-        },
-        {
-            "_id": "test.micLevel",
-            "type": "state",
-            "common": {
-                "name": "Live microphone level (RMS) during the test",
-                "type": "number",
-                "role": "value",
-                "min": 0,
-                "max": 32768,
-                "read": true,
-                "write": false,
-                "def": 0
-            },
-            "native": {}
-        },
-        {
-            "_id": "test.running",
-            "type": "state",
-            "common": {
-                "name": "Wake-word test is running",
-                "type": "boolean",
-                "role": "indicator",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        }
-    ]
+    "desc": {
+      "en": "Voice satellite for ioBroker.assistant: wake word + microphone streaming + spoken reply, running on this host.",
+      "de": "Sprach-Satellit für ioBroker.assistant: Wake-Word + Mikrofon-Streaming + gesprochene Antwort, läuft auf diesem Host.",
+      "ru": "Голосовой сателлит для ioBroker.assistant: слово-активатор, стриминг микрофона и озвученный ответ на этом хосте.",
+      "pt": "Satélite de voz para ioBroker.assistant: palavra de ativação + streaming de microfone + resposta falada, executando neste host.",
+      "nl": "Spraaksatelliet voor ioBroker.assistant: wake word + microfoonstreaming + gesproken antwoord, uitgevoerd op deze host.",
+      "fr": "Satellite vocal pour ioBroker.assistant : mot d'activation + streaming du microphone + réponse parlée, exécuté sur cet hôte.",
+      "it": "Satellite vocale per ioBroker.assistant: parola di attivazione + streaming del microfono + risposta parlata, in esecuzione su questo host.",
+      "es": "Satélite de voz para ioBroker.assistant: palabra de activación + transmisión de micrófono + respuesta hablada, ejecutándose en este host.",
+      "pl": "Satelita głosowy dla ioBroker.assistant: słowo wybudzające + strumieniowanie mikrofonu + odpowiedź mówiona, działająca na tym hoście.",
+      "uk": "Голосовий супутник для ioBroker.assistant: слово-пробудження + потокове передавання мікрофона + усна відповідь, що працює на цьому хості.",
+      "zh-cn": "ioBroker.assistant 的语音卫星：唤醒词+麦克风流+口语回复，在此主机上运行。"
+    },
+    "authors": [
+      "ioBroker"
+    ],
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
+    "tier": 3,
+    "keywords": [
+      "assistant",
+      "voice",
+      "satellite",
+      "wakeword"
+    ],
+    "platform": "Javascript/Node.js",
+    "main": "build/main.js",
+    "icon": "assistant-satellite.svg",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.assistant-satellite/main/admin/assistant-satellite.svg",
+    "readme": "https://github.com/ioBroker/ioBroker.assistant-satellite/blob/main/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "nogit": true,
+    "type": "communication",
+    "compact": false,
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=8.0.0"
+      }
+    ],
+    "osDependencies": {
+      "linux": [
+        "alsa-utils"
+      ]
+    },
+    "messagebox": true
+  },
+  "native": {
+    "assistantInstance": "",
+    "transport": "ioBroker",
+    "hostOverride": "",
+    "room": "",
+    "port": 7776,
+    "audioBackend": "auto",
+    "micDevice": "default",
+    "speakerDevice": "default",
+    "mixerControl": "",
+    "wakewordModel": "hey_jarvis",
+    "wakewordModel2": "",
+    "wakewordModel3": "",
+    "wakewordUpload": "",
+    "followUp": false,
+    "followUpSeconds": 6,
+    "wakewordThreshold": 0.5,
+    "silenceThreshold": 300,
+    "silenceMs": 800,
+    "minRecordMs": 800,
+    "maxRecordMs": 8000,
+    "preBufferChunks": 5
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "",
+      "type": "meta",
+      "common": {
+        "name": "Uploaded wake-word models",
+        "type": "meta.user"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "name": "Satellite registered with the adapter",
+        "type": "boolean",
+        "role": "indicator.connected",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "status",
+      "type": "state",
+      "common": {
+        "name": "Satellite status (idle/listening/processing/speaking)",
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": false,
+        "def": "idle"
+      },
+      "native": {}
+    },
+    {
+      "_id": "volume",
+      "type": "state",
+      "common": {
+        "name": "Speaker volume (0–100 %)",
+        "type": "number",
+        "role": "level.volume",
+        "unit": "%",
+        "min": 0,
+        "max": 100,
+        "read": true,
+        "write": true,
+        "def": 100
+      },
+      "native": {}
+    },
+    {
+      "_id": "mute",
+      "type": "state",
+      "common": {
+        "name": "Mute speaker",
+        "type": "boolean",
+        "role": "media.mute",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "dnd",
+      "type": "state",
+      "common": {
+        "name": "Do not disturb (suppress announcements)",
+        "type": "boolean",
+        "role": "switch.enable",
+        "read": true,
+        "write": true,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "test",
+      "type": "channel",
+      "common": {
+        "name": "Wake-word test"
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.peakScore",
+      "type": "state",
+      "common": {
+        "name": "Peak wake-word score during the last test",
+        "type": "number",
+        "role": "value",
+        "min": 0,
+        "max": 1,
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.detected",
+      "type": "state",
+      "common": {
+        "name": "Wake word detected during the last test",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.score",
+      "type": "state",
+      "common": {
+        "name": "Live wake-word score during the test",
+        "type": "number",
+        "role": "value",
+        "min": 0,
+        "max": 1,
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.micLevel",
+      "type": "state",
+      "common": {
+        "name": "Live microphone level (RMS) during the test",
+        "type": "number",
+        "role": "value",
+        "min": 0,
+        "max": 32768,
+        "read": true,
+        "write": false,
+        "def": 0
+      },
+      "native": {}
+    },
+    {
+      "_id": "test.running",
+      "type": "state",
+      "common": {
+        "name": "Wake-word test is running",
+        "type": "boolean",
+        "role": "indicator",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }

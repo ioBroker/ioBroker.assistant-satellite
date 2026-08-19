@@ -1,6 +1,6 @@
 {
   "name": "iobroker.assistant-satellite",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "ioBroker adapter that runs a voice satellite for ioBroker.assistant on this host (wake word + mic streaming + TTS playback). Thin wrapper around @iobroker/assistant-satellite.",
   "author": "ioBroker",
   "license": "MIT",
