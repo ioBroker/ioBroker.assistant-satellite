@@ -14,9 +14,28 @@ admin UI). On a bare Pi without ioBroker, use the standalone package directly
 ## Requirements
 
 - A mic + speaker on the host
-- Audio backend (auto-selected, or force it under **Audio backend**): **Linux** → `alsa-utils`
-  (`arecord`/`aplay`); **Windows/macOS** → `ffmpeg`
+- Audio backend (auto-selected, or force it under **Audio backend**):
+  - **Linux** → `alsa-utils`: `arecord` records, `aplay` plays (`sudo apt install alsa-utils`)
+  - **Windows / macOS** → **ffmpeg**: `ffmpeg` records and `ffplay` plays — you need **both** binaries,
+    reachable via the `PATH` (see below). Minimal builds that ship `ffmpeg.exe` only are not enough.
 - A running `ioBroker.assistant` instance (the satellite talks to it over the ioBroker message bus by default)
+
+### ffmpeg / ffplay in the PATH (Windows, macOS)
+
+The adapter starts `ffmpeg` and `ffplay` **by name**, so the folder holding them must be in the `PATH`
+of the account ioBroker runs under — not just in your own terminal:
+
+- **Windows** — grab a full build (e.g. [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) or
+  [BtbN](https://github.com/BtbN/FFmpeg-Builds/releases)), unpack it to e.g. `C:\FFMPEG`, then add the
+  folder that contains `ffmpeg.exe` **and** `ffplay.exe` to the **system** `Path`
+  (*System Properties → Advanced → Environment Variables → System variables → Path*).
+  Verify in a **new** shell: `where ffmpeg` and `where ffplay`.
+- **macOS** — `brew install ffmpeg` (installs both into the Homebrew `bin` dir); verify with
+  `which ffmpeg ffplay`.
+
+A process only ever sees the `PATH` it inherited when it started, so **restart ioBroker (service or
+host) after changing it** — otherwise the instance log keeps showing
+`ffmpeg failed: spawn ffmpeg ENOENT — is it installed? (install ffmpeg)`.
 
 ## Setup
 
@@ -35,6 +54,8 @@ Install the adapter, add an instance, then configure it. The settings are groupe
 - **Audio backend** — `Auto` / `ALSA` / `ffmpeg`
 - **Microphone / Speaker device** — e.g. `plughw:2,0` on a Pi (ALSA) or a dshow name / avfoundation index
   (ffmpeg); `default` = system default. The device lists are read from this host (instance must be running).
+  On **Windows / macOS** only *capture* devices can be enumerated, and `ffplay` always plays to the
+  system's default output device — pick the speaker in the OS sound settings, not here.
 - **ALSA mixer control** — optional; only used by the `volume`/`mute` states (see below). Empty = auto-detect
   on the speaker's card; set a name (e.g. `PCM`, `Master`, `Speaker`) if the wrong one is picked. ALSA only.
 
@@ -57,13 +78,22 @@ and `info.connection` reflects whether the satellite is registered with the assi
 
 ## Volume, mute, Do-Not-Disturb
 
-These writable states drive the speaker's ALSA mixer, so they apply to answers, announcements and the
-beep alike (ALSA backend only; the mixer control is auto-detected on the speaker's card, or set it under
-**ALSA mixer control** if the wrong one is picked):
+These writable states apply to answers, announcements and the beep alike:
 
 - **`volume`** — 0–100 %
 - **`mute`** — silence the speaker
 - **`dnd`** — Do-Not-Disturb: **announcements are suppressed** (replies to your own questions still play)
+
+`volume` and `mute` drive the host's mixer. On start it works the other way round: the adapter reads the
+host's current setting into the two states, so bringing an instance up never changes how loud the machine
+is playing. Every write to the states after that is applied to the mixer:
+
+- **Linux (ALSA)** — the mixer of the speaker's card. The control is auto-detected, or set it under
+  **ALSA mixer control** if the wrong one is picked.
+- **Windows** — master volume / mute of the **default playback device** (Core Audio, driven through the
+  built-in PowerShell — nothing extra to install). That is where `ffplay` plays, i.e. the same slider as
+  in the Windows sound settings, so it applies **system-wide**, not only to the satellite.
+- **macOS** — not wired up: `dnd` works, `volume` / `mute` do not.
 
 **Priority announcements:** if the announcement text (sent via the assistant's `tts.text` /
 `satellites.<id>.tts`) starts with **`!`**, the `!` is stripped and it plays **even when DND is on** —
@@ -74,6 +104,11 @@ e.g. `!Water leak in the basement`.
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (@GermanBluefox) `volume` / `mute` now work on Windows too (default playback device via Core Audio)
+* (@GermanBluefox) On start the current host volume/mute is adopted into the states instead of being overwritten
+* (@GermanBluefox) Documented the `ffmpeg` / `ffplay` PATH requirement for Windows and macOS
+
 ### 0.1.2 (2026-08-03)
 * (@GermanBluefox) Updated packages
 

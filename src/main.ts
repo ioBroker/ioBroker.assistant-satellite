@@ -26,6 +26,85 @@ const BUNDLED_WAKEWORDS: Record<string, string> = { io_broker: 'io_broker.onnx' 
 /** Support files that live next to the wake-word models but are not wake words themselves. */
 const MODEL_SUPPORT_FILES = ['melspectrogram.onnx', 'embedding_model.onnx'];
 
+/**
+ * Windows has no CLI mixer, so `volume`/`mute` go through the Core Audio API
+ * (`IMMDeviceEnumerator` → `IAudioEndpointVolume`) driven from the built-in PowerShell — nothing
+ * extra to install. Defines `[IoBrokerSatellite.Mixer]::Set(percent, mute)` and `::Get()`; the caller
+ * appends the call. Both COM interfaces are IUnknown-only, so every call happens inside C# —
+ * handing the interface back to PowerShell yields a method-less `System.__ComObject`.
+ */
+const WIN_VOLUME_PS = `$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+
+namespace IoBrokerSatellite {
+    [Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IAudioEndpointVolume {
+        // Slots we never call — declared only so the ones below land on the right vtable offset.
+        int RegisterControlChangeNotify(IntPtr n);
+        int UnregisterControlChangeNotify(IntPtr n);
+        int GetChannelCount(out uint count);
+        int SetMasterVolumeLevel(float db, ref Guid ctx);
+        int SetMasterVolumeLevelScalar(float level, ref Guid ctx);
+        int GetMasterVolumeLevel(out float db);
+        int GetMasterVolumeLevelScalar(out float level);
+        int SetChannelVolumeLevel(uint ch, float db, ref Guid ctx);
+        int SetChannelVolumeLevelScalar(uint ch, float level, ref Guid ctx);
+        int GetChannelVolumeLevel(uint ch, out float db);
+        int GetChannelVolumeLevelScalar(uint ch, out float level);
+        int SetMute([MarshalAs(UnmanagedType.Bool)] bool mute, ref Guid ctx);
+        int GetMute([MarshalAs(UnmanagedType.Bool)] out bool mute);
+    }
+
+    [Guid("D666063F-1587-4E43-81F1-B948E807363F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IMMDevice {
+        int Activate(ref Guid iid, uint clsCtx, IntPtr param, [MarshalAs(UnmanagedType.IUnknown)] out object iface);
+    }
+
+    [Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IMMDeviceEnumerator {
+        int EnumAudioEndpoints(int flow, int mask, IntPtr devices);
+        int GetDefaultAudioEndpoint(int flow, int role, out IMMDevice device);
+    }
+
+    [ComImport, Guid("BCDE0395-E52F-467C-8E3D-C4579291692E")]
+    public class MMDeviceEnumerator { }
+
+    public static class Mixer {
+        // Volume interface of the default playback device (eRender / eConsole) — where ffplay plays.
+        static IAudioEndpointVolume Endpoint() {
+            IMMDevice device;
+            var enumerator = (IMMDeviceEnumerator)new MMDeviceEnumerator();
+            Marshal.ThrowExceptionForHR(enumerator.GetDefaultAudioEndpoint(0, 0, out device));
+            object iface;
+            Guid iid = typeof(IAudioEndpointVolume).GUID;
+            Marshal.ThrowExceptionForHR(device.Activate(ref iid, 23 /* CLSCTX_ALL */, IntPtr.Zero, out iface));
+            return (IAudioEndpointVolume)iface;
+        }
+
+        public static void Set(int percent, bool mute) {
+            var volume = Endpoint();
+            Guid ctx = Guid.Empty;
+            // Scalar = the slider position in the Windows sound settings, like amixer's "N%".
+            Marshal.ThrowExceptionForHR(volume.SetMasterVolumeLevelScalar(percent / 100f, ref ctx));
+            Marshal.ThrowExceptionForHR(volume.SetMute(mute, ref ctx));
+        }
+
+        // "<percent> <0|1>" — parsed by readVolumeWindows().
+        public static string Get() {
+            var volume = Endpoint();
+            float level;
+            bool mute;
+            Marshal.ThrowExceptionForHR(volume.GetMasterVolumeLevelScalar(out level));
+            Marshal.ThrowExceptionForHR(volume.GetMute(out mute));
+            return (int)Math.Round(level * 100) + " " + (mute ? 1 : 0);
+        }
+    }
+}
+'@`;
+
 /** An option for an `autocompleteSendTo` field. */
 interface DeviceOption {
     label: string;
@@ -110,6 +189,10 @@ class AssistantSatellite extends Adapter {
     private announcePlayback: { proc: ChildProcess } | null = null;
     /** Cached ALSA mixer simple-control name (auto-detected once). */
     private mixerControlCache: string | null = null;
+    /** A mixer update is in flight — further writes only set `volumePending` (see `applyVolume`). */
+    private volumeBusy = false;
+    /** A volume/mute write arrived while the mixer update ran; re-run once it finishes. */
+    private volumePending = false;
 
     public constructor(options: Partial<AdapterOptions> = {}) {
         super({ ...options, name: 'assistant-satellite' });
@@ -157,7 +240,7 @@ class AssistantSatellite extends Adapter {
         }
     }
 
-    // ── Volume / mute via the ALSA mixer of the speaker's card (ALSA backend only) ───────────────────
+    // ── Volume / mute: ALSA mixer (Linux) or the default playback device (Windows) ───────────────────
 
     /** ALSA card number from the speaker device (`plughw:2,0` → "2"); null → default card. */
     private mixerCard(): string | null {
@@ -184,19 +267,45 @@ class AssistantSatellite extends Adapter {
         return this.mixerControlCache;
     }
 
-    /** Push the persisted volume/mute states to the ALSA mixer. */
+    /**
+     * Push the persisted volume/mute states to the host mixer. Writes coalesce: while one pass runs,
+     * further calls only flag a re-run, so dragging a volume slider costs one extra pass instead of
+     * one child process per step (the Windows path spawns PowerShell, ~1 s).
+     */
     private async applyVolume(): Promise<void> {
-        if (this.config.audioBackend === 'ffmpeg') {
-            return; // amixer is ALSA-only
+        if (this.volumeBusy) {
+            this.volumePending = true;
+            return;
         }
+        this.volumeBusy = true;
+        try {
+            do {
+                this.volumePending = false;
+                const vol = Math.max(
+                    0,
+                    Math.min(100, Math.round(Number((await this.getStateAsync('volume'))?.val ?? 100))),
+                );
+                const muted = !!(await this.getStateAsync('mute'))?.val;
+                if (process.platform === 'win32') {
+                    await this.applyVolumeWindows(vol, muted);
+                } else if (this.effectiveBackend(this.config.audioBackend) === 'alsa') {
+                    await this.applyVolumeAlsa(vol, muted);
+                }
+                // macOS has no mixer hook here — set the volume in the system sound settings instead.
+            } while (this.volumePending);
+        } finally {
+            this.volumeBusy = false;
+        }
+    }
+
+    /** Volume/mute through the ALSA mixer of the speaker's card. */
+    private async applyVolumeAlsa(vol: number, muted: boolean): Promise<void> {
         const card = this.mixerCard();
         const control = await this.detectMixerControl(card);
         if (!control) {
             this.log.debug('No ALSA mixer control found — volume control unavailable on this device.');
             return;
         }
-        const vol = Math.max(0, Math.min(100, Math.round(Number((await this.getStateAsync('volume'))?.val ?? 100))));
-        const muted = !!(await this.getStateAsync('mute'))?.val;
         try {
             await execFileAsync('amixer', [
                 ...(card ? ['-c', card] : []),
@@ -208,6 +317,88 @@ class AssistantSatellite extends Adapter {
             this.log.debug(`Volume set: ${control} ${vol}%${muted ? ' (muted)' : ''}`);
         } catch (e) {
             this.log.warn(`amixer failed for control '${control}': ${(e as Error).message}`);
+        }
+    }
+
+    /**
+     * Volume/mute of the Windows **default playback device**. `ffplay` always plays there (a speaker
+     * device cannot be selected on Windows), so that endpoint is the counterpart of the speaker's ALSA
+     * card — note it is the system-wide volume, the same slider as in the Windows sound settings.
+     */
+    private async applyVolumeWindows(vol: number, muted: boolean): Promise<void> {
+        const script = `${WIN_VOLUME_PS}\n[IoBrokerSatellite.Mixer]::Set(${vol}, $${muted})\n`;
+        try {
+            // -EncodedCommand (base64 UTF-16LE) sidesteps quoting of the embedded C# entirely.
+            await execFileAsync(
+                'powershell.exe',
+                ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')],
+                { windowsHide: true, timeout: 30000 }, // every call compiles the C# helper (~1 s)
+            );
+            this.log.debug(`Volume set: default playback device ${vol}%${muted ? ' (muted)' : ''}`);
+        } catch (e) {
+            this.log.warn(`Windows volume control failed: ${(e as Error).message}`);
+        }
+    }
+
+    /**
+     * Adopt the host mixer's current volume/mute into the states. Called on start instead of pushing
+     * the stored values — bringing an instance up must not change how loud the machine is playing.
+     * Written with ack, so this does not bounce back through `onStateChange`.
+     */
+    private async syncVolumeFromHost(): Promise<void> {
+        const current = await this.readHostVolume();
+        if (!current) {
+            this.log.debug('Host volume not readable — volume/mute states left untouched.');
+            return;
+        }
+        await this.setStateAsync('volume', { val: current.vol, ack: true });
+        await this.setStateAsync('mute', { val: current.muted, ack: true });
+        this.log.debug(`Adopted host volume: ${current.vol}%${current.muted ? ' (muted)' : ''}`);
+    }
+
+    /** Current volume/mute of the host mixer, or null if there is none to read. */
+    private async readHostVolume(): Promise<{ vol: number; muted: boolean } | null> {
+        if (process.platform === 'win32') {
+            return this.readVolumeWindows();
+        }
+        if (this.effectiveBackend(this.config.audioBackend) === 'alsa') {
+            return this.readVolumeAlsa();
+        }
+        return null;
+    }
+
+    /** Parse `amixer sget <control>`: the first `[NN%]` and, if the control has a switch, `[on|off]`. */
+    private async readVolumeAlsa(): Promise<{ vol: number; muted: boolean } | null> {
+        const card = this.mixerCard();
+        const control = await this.detectMixerControl(card);
+        if (!control) {
+            return null;
+        }
+        try {
+            const { stdout } = await execFileAsync('amixer', [...(card ? ['-c', card] : []), 'sget', control]);
+            const vol = stdout.match(/\[(\d+)%\]/);
+            const sw = stdout.match(/\[(on|off)\]/);
+            return vol ? { vol: Number(vol[1]), muted: sw ? sw[1] === 'off' : false } : null;
+        } catch (e) {
+            this.log.debug(`amixer sget '${control}' failed: ${(e as Error).message}`);
+            return null;
+        }
+    }
+
+    /** Volume/mute of the Windows default playback device (see `applyVolumeWindows`). */
+    private async readVolumeWindows(): Promise<{ vol: number; muted: boolean } | null> {
+        const script = `${WIN_VOLUME_PS}\n[IoBrokerSatellite.Mixer]::Get()\n`;
+        try {
+            const { stdout } = await execFileAsync(
+                'powershell.exe',
+                ['-NoProfile', '-NonInteractive', '-EncodedCommand', Buffer.from(script, 'utf16le').toString('base64')],
+                { windowsHide: true, timeout: 30000 },
+            );
+            const m = stdout.trim().match(/(\d+)\s+([01])/);
+            return m ? { vol: Number(m[1]), muted: m[2] === '1' } : null;
+        } catch (e) {
+            this.log.debug(`Reading the Windows volume failed: ${(e as Error).message}`);
+            return null;
         }
     }
 
@@ -397,10 +588,10 @@ class AssistantSatellite extends Adapter {
     private async onReady(): Promise<void> {
         const c = this.config;
         await this.syncUploadedModels(); // materialize any uploaded .onnx models to the FS models dir
-        // Volume/mute drive the ALSA mixer of the speaker's card — apply the persisted value on start.
+        // Volume/mute drive the host mixer; on start we take over what the host is set to right now.
         await this.subscribeStatesAsync('volume');
         await this.subscribeStatesAsync('mute');
-        await this.applyVolume();
+        await this.syncVolumeFromHost();
         if ((c.transport || 'ioBroker') === 'ioBroker') {
             this.log.info(`ioBroker transport → assistant '${c.assistantInstance || '-'}' (no UDP).`);
             await this.startLocalListener();
