@@ -1,10 +1,11 @@
 {
+    "'default' = system default. The list is read from this host (instance must be running).": "'default' = Systemstandard. Die Liste wird von diesem Host gelesen (die Instanz muss laufen).",
     "A second wake word — the satellite triggers on any of them.": "Ein zweites Wake-Word — der Satellit reagiert auf jedes davon.",
     "A third wake word.": "Ein drittes Wake-Word.",
     "ALSA (arecord/aplay)": "ALSA (arecord/aplay)",
-    "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA z. B. plughw:2,0; ffmpeg = dshow-Name / avfoundation-Index. 'default' = Systemstandard.",
+    "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA z. B. plughw:2,0; ffmpeg = dshow-Name / avfoundation-Index. 'default' = Systemstandard. Die Liste wird von diesem Host gelesen (die Instanz muss laufen).",
     "ALSA mixer control (optional)": "ALSA-Mixer-Control (optional)",
-    "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Nach der Antwort bleibt das Mikro kurz offen, damit du fortsetzen kannst ('…und die Küche auch'), ohne das Wake-Word erneut zu sagen. Nach Stille zurück zum Wake-Word-Modus.",
+    "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Nach der Antwort bleibt das Mikro kurz offen, damit du fortsetzen kannst ('…und die Küche auch') oder eine Rückfrage beantworten kannst, ohne das Wake-Word erneut zu sagen. Nach Stille zurück zum Wake-Word-Modus.",
     "Assistant instance": "Assistant-Instanz",
     "Audio": "Audio",
     "Audio backend": "Audio-Backend",

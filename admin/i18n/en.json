@@ -1,10 +1,11 @@
 {
+    "'default' = system default. The list is read from this host (instance must be running).": "'default' = system default. The list is read from this host (instance must be running).",
     "A second wake word — the satellite triggers on any of them.": "A second wake word — the satellite triggers on any of them.",
     "A third wake word.": "A third wake word.",
     "ALSA (arecord/aplay)": "ALSA (arecord/aplay)",
-    "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.",
+    "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).",
     "ALSA mixer control (optional)": "ALSA mixer control (optional)",
-    "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.",
+    "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.",
     "Assistant instance": "Assistant instance",
     "Audio": "Audio",
     "Audio backend": "Audio backend",

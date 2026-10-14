@@ -2,15 +2,18 @@
     "i18n": true,
     "type": "panel",
     "items": {
-        "_serverHeader": { "type": "header", "size": 2, "text": "ioBroker.assistant server" },
+        "_serverHeader": { "type": "header", "size": 2, "text": "ioBroker.assistant server", "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12 },
         "assistantInstance": {
             "newLine": true,
             "type": "instance",
             "adapter": "assistant",
             "label": "Assistant instance",
             "help": "The ioBroker.assistant instance this satellite talks to (needs the instance running).",
+            "xs": 12,
             "sm": 12,
-            "md": 5
+            "md": 5,
+            "lg": 5,
+            "xl": 5
         },
         "transport": {
             "type": "select",
@@ -21,8 +24,11 @@
                 { "label": "UDP (Hannah / ESP stream)", "value": "udp" }
             ],
             "default": "ioBroker",
+            "xs": 12,
             "sm": 12,
-            "md": 4
+            "md": 4,
+            "lg": 4,
+            "xl": 4
         },
         "port": {
             "type": "number",
@@ -32,8 +38,11 @@
             "min": 1,
             "max": 65535,
             "hidden": "data.transport === 'ioBroker'",
+            "xs": 12,
             "sm": 6,
-            "md": 3
+            "md": 3,
+            "lg": 3,
+            "xl": 3
         },
         "hostOverride": {
             "newLine": true,
@@ -41,13 +50,16 @@
             "label": "Host IP override (optional)",
             "help": "Force a specific IP if the automatic resolution picks the wrong interface.",
             "hidden": "data.transport === 'ioBroker'",
+            "xs": 12,
             "sm": 12,
-            "md": 4
+            "md": 4,
+            "lg": 4,
+            "xl": 4
         },
 
-        "_idHeader": { "newLine": true, "type": "header", "size": 2, "text": "Identity" },
-        "room": { "newLine": true, "type": "room", "label": "Room", "sm": 12, "md": 4 },
-        "_audioHeader": { "newLine": true, "type": "header", "size": 2, "text": "Audio" },
+        "_idHeader": { "newLine": true, "type": "header", "size": 2, "text": "Identity", "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12 },
+        "room": { "newLine": true, "type": "room", "label": "Room", "xs": 12, "sm": 12, "md": 4, "lg": 4, "xl": 4 },
+        "_audioHeader": { "newLine": true, "type": "header", "size": 2, "text": "Audio", "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12 },
         "audioBackend": {
             "newLine": true,
             "type": "select",
@@ -58,8 +70,11 @@
                 { "label": "ffmpeg", "value": "ffmpeg" }
             ],
             "default": "auto",
+            "xs": 12,
             "sm": 6,
-            "md": 3
+            "md": 3,
+            "lg": 3,
+            "xl": 3
         },
         "micDevice": {
             "type": "autocompleteSendTo",
@@ -70,8 +85,11 @@
             "alsoDependsOn": ["audioBackend"],
             "freeSolo": true,
             "default": "default",
+            "xs": 12,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "lg": 4,
+            "xl": 4
         },
         "speakerDevice": {
             "type": "autocompleteSendTo",
@@ -82,18 +100,24 @@
             "alsoDependsOn": ["audioBackend"],
             "freeSolo": true,
             "default": "default",
+            "xs": 12,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "lg": 4,
+            "xl": 4
         },
         "mixerControl": {
             "type": "text",
             "label": "ALSA mixer control (optional)",
             "help": "For the volume/mute states. Empty = auto-detect on the speaker's card. Set a name (e.g. PCM, Master, Speaker — see 'amixer -c <card> scontrols') if auto-detection picks the wrong one. ALSA only.",
             "hidden": "data.audioBackend === 'ffmpeg'",
+            "xs": 12,
             "sm": 6,
-            "md": 4
+            "md": 4,
+            "lg": 4,
+            "xl": 4
         },
-        "_wwHeader": { "newLine": true, "type": "header", "size": 2, "text": "Wake word" },
+        "_wwHeader": { "newLine": true, "type": "header", "size": 2, "text": "Wake word", "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12 },
         "wakewordModel": {
             "newLine": true,
             "type": "autocompleteSendTo",
@@ -102,9 +126,11 @@
             "command": "getWakewords",
             "freeSolo": true,
             "default": "hey_jarvis",
+            "xs": 12,
             "sm": 6,
             "md": 4,
-            "lg": 3
+            "lg": 3,
+            "xl": 3
         },
         "wakewordModel2": {
             "type": "autocompleteSendTo",
@@ -113,9 +139,11 @@
             "command": "getWakewords",
             "freeSolo": true,
             "hidden": "!data.wakewordModel",
+            "xs": 12,
             "sm": 6,
             "md": 4,
-            "lg": 3
+            "lg": 3,
+            "xl": 3
         },
         "wakewordModel3": {
             "type": "autocompleteSendTo",
@@ -124,9 +152,11 @@
             "command": "getWakewords",
             "freeSolo": true,
             "hidden": "!data.wakewordModel || !data.wakewordModel2",
+            "xs": 12,
             "sm": 6,
             "md": 4,
-            "lg": 3
+            "lg": 3,
+            "xl": 3
         },
         "wakewordThreshold": {
             "type": "number",
@@ -136,9 +166,11 @@
             "min": 0,
             "max": 1,
             "step": 0.05,
+            "xs": 12,
             "sm": 6,
-            "md": 2,
-            "lg": 3
+            "md": 3,
+            "lg": 3,
+            "xl": 3
         },
         "wakewordUpload": {
             "newLine": true,
@@ -150,8 +182,11 @@
             "delete": true,
             "label": "Upload a custom wake-word model (.onnx)",
             "help": "Upload a single self-contained .onnx here, then pick it in a 'Wake word' field above (needs the instance running). External-data models (.onnx + .onnx.data) are not supported — export a single file.",
+            "xs": 12,
             "sm": 12,
-            "md": 6
+            "md": 6,
+            "lg": 6,
+            "xl": 6
         },
         "followUp": {
             "newLine": true,
@@ -159,8 +194,11 @@
             "label": "Follow-up conversation (no wake word for replies)",
             "help": "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.",
             "default": false,
+            "xs": 12,
             "sm": 8,
-            "md": 5
+            "md": 5,
+            "lg": 5,
+            "xl": 5
         },
         "followUpSeconds": {
             "type": "number",
@@ -170,8 +208,11 @@
             "min": 1,
             "max": 30,
             "hidden": "!data.followUp",
+            "xs": 12,
             "sm": 4,
-            "md": 3
+            "md": 3,
+            "lg": 3,
+            "xl": 3
         },
         "_wakeTest": {
             "newLine": true,
@@ -180,20 +221,27 @@
             "url": "custom/customComponents.js",
             "name": "ConfigCustomAssistantSatellite/Components/WakeWordTestComponent",
             "bundlerType": "module",
-            "sm": 12
+            "xs": 12,
+            "sm": 12,
+            "md": 12,
+            "lg": 12,
+            "xl": 12
         },
-        "_recHeader": { "newLine": true, "type": "header", "size": 3, "text": "Recording (advanced)" },
+        "_recHeader": { "newLine": true, "type": "header", "size": 3, "text": "Recording (advanced)", "xs": 12, "sm": 12, "md": 12, "lg": 12, "xl": 12 },
         "silenceThreshold": {
             "newLine": true,
             "type": "number",
             "label": "Silence RMS threshold",
             "default": 300,
+            "xs": 12,
             "sm": 6,
-            "md": 2
+            "md": 2,
+            "lg": 2,
+            "xl": 2
         },
-        "silenceMs": { "type": "number", "label": "Silence (ms)", "default": 800, "sm": 6, "md": 2 },
-        "minRecordMs": { "type": "number", "label": "Min record (ms)", "default": 800, "sm": 6, "md": 2 },
-        "maxRecordMs": { "type": "number", "label": "Max record (ms)", "default": 8000, "sm": 6, "md": 2 },
-        "preBufferChunks": { "type": "number", "label": "Pre-buffer chunks", "default": 5, "sm": 6, "md": 2 }
+        "silenceMs": { "type": "number", "label": "Silence (ms)", "default": 800, "xs": 12, "sm": 6, "md": 2, "lg": 2, "xl": 2 },
+        "minRecordMs": { "type": "number", "label": "Min record (ms)", "default": 800, "xs": 12, "sm": 6, "md": 2, "lg": 2, "xl": 2 },
+        "maxRecordMs": { "type": "number", "label": "Max record (ms)", "default": 8000, "xs": 12, "sm": 6, "md": 2, "lg": 2, "xl": 2 },
+        "preBufferChunks": { "type": "number", "label": "Pre-buffer chunks", "default": 5, "xs": 12, "sm": 6, "md": 2, "lg": 2, "xl": 2 }
     }
 }

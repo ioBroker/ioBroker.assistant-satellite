@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = системне значення за замовчуванням. Список зчитується з цього хоста (екземпляр має бути запущений).",
   "A second wake word — the satellite triggers on any of them.": "Друге сигнальне слово — супутник спрацьовує на будь-якому з них.",
   "A third wake word.": "Третє слово для пробудження.",
   "ALSA (arecord/aplay)": "ALSA (запис/відтворення)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA, наприклад, plughw:2,0; ffmpeg = назва dshow / індекс avfoundation. 'default' = системне значення за замовчуванням.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA, наприклад, plughw:2,0; ffmpeg = назва dshow / індекс avfoundation. 'default' = системне значення за замовчуванням. Список зчитується з цього хоста (екземпляр має бути запущений).",
   "ALSA mixer control (optional)": "Керування змішувачем ALSA (опціонально)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Після того, як асистент відповість, ненадовго утримуйте мікрофон увімкненим, щоб мати змогу продовжити («…і кухня також»), не повторюючи слово для пробудження. Після тиші повертається до режиму слова для пробудження.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Після відповіді асистента мікрофон ненадовго залишається увімкненим, щоб ви могли продовжити («…і кухня також») або відповісти на уточнювальне запитання, не повторюючи слово для пробудження. Після тиші повертається до режиму слова для пробудження.",
   "Assistant instance": "Екземпляр помічника",
   "Audio": "Аудіо",
   "Audio backend": "Аудіо-бекенд",

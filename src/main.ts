@@ -26,6 +26,16 @@ const BUNDLED_WAKEWORDS: Record<string, string> = { io_broker: 'io_broker.onnx' 
 /** Support files that live next to the wake-word models but are not wake words themselves. */
 const MODEL_SUPPORT_FILES = ['melspectrogram.onnx', 'embedding_model.onnx'];
 
+/** Feature a js-controller announces once it keeps the registry of used resources (js-controller 8+). */
+const USED_RESOURCES_FEATURE = 'CONTROLLER_USED_RESOURCES';
+/** The UDP part of the used-resources registry of js-controller 8. Not in the installed types, so probed at runtime. */
+type UdpPortResource = { port: number; bind?: string; family?: 4 | 6 };
+interface UsedResourcesApi {
+    registerUsedResource(type: 'udpPort', data: UdpPortResource): Promise<void>;
+    freeUsedResource(type: 'udpPort', data?: Partial<UdpPortResource>): Promise<void>;
+    supportsFeature?(feature: string): boolean;
+}
+
 /**
  * Windows has no CLI mixer, so `volume`/`mute` go through the Core Audio API
  * (`IMMDeviceEnumerator` → `IAudioEndpointVolume`) driven from the built-in PowerShell — nothing
@@ -145,7 +155,7 @@ interface AdapterConfig {
     /** Force a specific adapter IP (overrides the resolved one). */
     hostOverride: string;
     room: string;
-    /** Local UDP port the satellite receives TTS on (named `port` so admin shows it as a used resource). */
+    /** Local UDP port the satellite receives TTS on (UDP transport only; reported to js-controller 8 as `udpPort`). */
     port: number;
     audioBackend: 'auto' | 'alsa' | 'ffmpeg';
     micDevice: string;
@@ -594,6 +604,8 @@ class AssistantSatellite extends Adapter {
         await this.syncVolumeFromHost();
         if ((c.transport || 'ioBroker') === 'ioBroker') {
             this.log.info(`ioBroker transport → assistant '${c.assistantInstance || '-'}' (no UDP).`);
+            // No port is opened in this mode: drop a UDP port left registered by an earlier run with UDP transport
+            await this.freeUdpPorts();
             await this.startLocalListener();
             // Register with the assistant so we show up under assistant.0.satellites and can receive
             // pushed announcements; refresh periodically as a heartbeat.
@@ -619,12 +631,54 @@ class AssistantSatellite extends Adapter {
             },
         });
 
+        // Registered before the start: the socket is bound at its beginning, but `start()` only resolves once the
+        // assistant answered, which may take any time. Replaces whatever this instance registered before.
+        await this.registerUdpPort(cfg.listenPort);
         try {
             await this.satellite.start();
             await this.setState('info.connection', { val: true, ack: true });
         } catch (e) {
             this.log.error(`Could not start satellite: ${(e as Error).message}`);
+            await this.freeUdpPorts();
             await this.setState('info.connection', { val: false, ack: true });
+        }
+    }
+
+    /** The used-resources registry of js-controller 8, or null if adapter-core or the controller lack it. */
+    private usedResourcesApi(): UsedResourcesApi | null {
+        const api = this as unknown as UsedResourcesApi;
+        if (typeof api.registerUsedResource !== 'function' || typeof api.freeUsedResource !== 'function') {
+            return null;
+        }
+        // A controller without the registry never answers the calls - each would wait for the API timeout
+        return api.supportsFeature?.(USED_RESOURCES_FEATURE) ? api : null;
+    }
+
+    /** Report the UDP port the satellite receives TTS on as used by this instance (js-controller 8+). */
+    private async registerUdpPort(port: number): Promise<void> {
+        const api = this.usedResourcesApi();
+        if (!api) {
+            return;
+        }
+        try {
+            // Bound on all interfaces, which occupies the port in every family - so neither bind nor family is set
+            await api.registerUsedResource('udpPort', { port });
+            this.log.debug(`Registered UDP port ${port} as used by this instance`);
+        } catch (e) {
+            this.log.warn(`Could not register UDP port ${port} as used: ${(e as Error).message}`);
+        }
+    }
+
+    /** Take back every UDP port this instance has registered (js-controller 8+). */
+    private async freeUdpPorts(): Promise<void> {
+        const api = this.usedResourcesApi();
+        if (!api) {
+            return;
+        }
+        try {
+            await api.freeUsedResource('udpPort');
+        } catch (e) {
+            this.log.warn(`Could not free the registered UDP port: ${(e as Error).message}`);
         }
     }
 
@@ -654,7 +708,7 @@ class AssistantSatellite extends Adapter {
                 await this.localListener?.stop();
                 this.satellite = null;
                 this.localListener = null;
-                await new Promise(r => setTimeout(r, 300)); // let ALSA fully release the mic before re-opening
+                await this.delay(300); // let ALSA fully release the mic before re-opening
             }
             await this.setState('test.detected', { val: false, ack: true });
             await this.setState('test.running', { val: true, ack: true });

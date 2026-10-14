@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = системные настройки по умолчанию. Список считывается с этого хоста (экземпляр должен быть запущен).",
   "A second wake word — the satellite triggers on any of them.": "Второе кодовое слово — спутник срабатывает при нажатии любого из них.",
   "A third wake word.": "Третье кодовое слово для пробуждения.",
   "ALSA (arecord/aplay)": "ALSA (arecord/aplay)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA, например, plughw:2,0; ffmpeg = имя dshow / индекс avfoundation. 'default' = системные настройки по умолчанию.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA, например, plughw:2,0; ffmpeg = имя dshow / индекс avfoundation. 'default' = системные настройки по умолчанию. Список считывается с этого хоста (экземпляр должен быть запущен).",
   "ALSA mixer control (optional)": "Управление микшером ALSA (опционально)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "После ответа ассистента ненадолго оставьте микрофон включенным, чтобы вы могли продолжить («…и кухню тоже»), не произнося снова кодовое слово. После наступления тишины микрофон снова переключается в режим активации по кодовому слову.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "После ответа ассистента микрофон ненадолго остаётся включённым, чтобы вы могли продолжить («…и кухню тоже») или ответить на уточняющий вопрос, не произнося снова кодовое слово. После тишины снова включается режим активации по кодовому слову.",
   "Assistant instance": "Вспомогательный экземпляр",
   "Audio": "Аудио",
   "Audio backend": "Аудио бэкенд",

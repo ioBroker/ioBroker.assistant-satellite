@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = predefinito di sistema. L'elenco viene letto da questo host (l'istanza deve essere in esecuzione).",
   "A second wake word — the satellite triggers on any of them.": "Una seconda parola di attivazione: il satellite si attiva su una qualsiasi di esse.",
   "A third wake word.": "Una terza parola di sveglia.",
   "ALSA (arecord/aplay)": "ALSA (registrazione/riproduzione)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA, ad esempio plughw:2,0; ffmpeg = dshow nome / avfoundation indice. 'default' = predefinito di sistema.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA, ad esempio plughw:2,0; ffmpeg = dshow nome / avfoundation indice. 'default' = predefinito di sistema. L'elenco viene letto da questo host (l'istanza deve essere in esecuzione).",
   "ALSA mixer control (optional)": "Controllo del miscelatore ALSA (opzionale)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Dopo che l'assistente ha risposto, tieni il microfono aperto brevemente in modo da poter continuare ('…e anche la cucina') senza pronunciare di nuovo la parola di attivazione. Dopo un momento di silenzio, la modalità con parola di attivazione torna automaticamente.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Dopo che l'assistente ha risposto, il microfono resta aperto brevemente in modo da poter continuare ('…e anche la cucina') o rispondere a una domanda di chiarimento senza pronunciare di nuovo la parola di attivazione. Dopo un momento di silenzio torna alla modalità con parola di attivazione.",
   "Assistant instance": "assistente perfetto",
   "Audio": "Audio",
   "Audio backend": "backend audio",

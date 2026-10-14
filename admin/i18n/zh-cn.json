@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = 系统默认值。列表从此主机读取（实例必须正在运行）。",
   "A second wake word — the satellite triggers on any of them.": "第二个唤醒词——卫星会对其中任何一个词触发。",
   "A third wake word.": "第三个唤醒词。",
   "ALSA (arecord/aplay)": "ALSA（录音/播放）",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "例如 ALSA plughw:2,0; ffmpeg = dshow 名称 / avfoundation 索引。'default' = 系统默认值。",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "例如 ALSA plughw:2,0; ffmpeg = dshow 名称 / avfoundation 索引。'default' = 系统默认值。列表从此主机读取（实例必须正在运行）。",
   "ALSA mixer control (optional)": "ALSA 混音器控制（可选）",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "助手回答后，请保持麦克风短暂开启，以便您可以继续说话（例如“……还有厨房”），而无需再次说出唤醒词。静默后，系统将自动恢复到唤醒词模式。",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "助手回答后，麦克风会短暂保持开启，以便您继续说话（例如“……还有厨房”）或回答澄清问题，而无需再次说出唤醒词。静默后将恢复到唤醒词模式。",
   "Assistant instance": "助理实例",
   "Audio": "声音的",
   "Audio backend": "音频后端",

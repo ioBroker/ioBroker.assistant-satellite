@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = systeemstandaard. De lijst wordt van deze host gelezen (de instantie moet actief zijn).",
   "A second wake word — the satellite triggers on any of them.": "Een tweede activeringswoord: de satelliet wordt door elk van deze woorden geactiveerd.",
   "A third wake word.": "Een derde activeringswoord.",
   "ALSA (arecord/aplay)": "ALSA (een opname/een weergave)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA bijv. plughw:2,0; ffmpeg = dshow naam / avfoundation index. 'default' = systeemstandaard.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA bijv. plughw:2,0; ffmpeg = dshow naam / avfoundation index. 'default' = systeemstandaard. De lijst wordt van deze host gelezen (de instantie moet actief zijn).",
   "ALSA mixer control (optional)": "ALSA-mixerbesturing (optioneel)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Nadat de assistent antwoord heeft gegeven, laat u de microfoon even open staan zodat u verder kunt gaan ('...en de keuken ook') zonder het activeringswoord opnieuw te hoeven zeggen. Na stilte schakelt het apparaat weer over naar de modus met activeringswoord.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Nadat de assistent heeft geantwoord, blijft de microfoon even open zodat u verder kunt gaan ('...en de keuken ook') of een verduidelijkende vraag kunt beantwoorden zonder het activeringswoord opnieuw te zeggen. Na stilte schakelt het apparaat terug naar de modus met activeringswoord.",
   "Assistant instance": "Assistent-instantie",
   "Audio": "Audio",
   "Audio backend": "Audio-backend",

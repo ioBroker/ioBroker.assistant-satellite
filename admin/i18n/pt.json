@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = padrão do sistema. A lista é lida deste host (a instância precisa estar em execução).",
   "A second wake word — the satellite triggers on any of them.": "Uma segunda palavra de ativação — o satélite é acionado por qualquer uma delas.",
   "A third wake word.": "Uma terceira palavra de despertar.",
   "ALSA (arecord/aplay)": "ALSA (gravação/reprodução)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA, por exemplo, plughw:2,0; ffmpeg = nome do dshow / índice avfoundation. 'default' = padrão do sistema.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA, por exemplo, plughw:2,0; ffmpeg = nome do dshow / índice avfoundation. 'default' = padrão do sistema. A lista é lida deste host (a instância precisa estar em execução).",
   "ALSA mixer control (optional)": "Controle de mixer ALSA (opcional)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Após a resposta do assistente, mantenha o microfone aberto brevemente para que você possa continuar ('...e a cozinha também') sem precisar dizer a palavra de ativação novamente. O sistema retorna ao modo de ativação por palavra após um período de silêncio.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Após a resposta do assistente, o microfone permanece aberto brevemente para que você possa continuar ('...e a cozinha também') ou responder a uma pergunta de esclarecimento sem precisar dizer a palavra de ativação novamente. Após um período de silêncio, retorna ao modo de palavra de ativação.",
   "Assistant instance": "Instância de assistente",
   "Audio": "Áudio",
   "Audio backend": "Backend de áudio",

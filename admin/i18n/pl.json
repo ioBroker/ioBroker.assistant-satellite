@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = domyślna wartość systemowa. Lista jest odczytywana z tego hosta (instancja musi być uruchomiona).",
   "A second wake word — the satellite triggers on any of them.": "Drugie słowo wybudzające — satelita uruchamia się na dowolnym z nich.",
   "A third wake word.": "Trzecie słowo budzące.",
   "ALSA (arecord/aplay)": "ALSA (nagrywanie/odtwarzanie)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA np. plughw:2,0; ffmpeg = nazwa programu dshow / indeks avfoundation. 'default' = domyślna wartość systemowa.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA np. plughw:2,0; ffmpeg = nazwa programu dshow / indeks avfoundation. 'default' = domyślna wartość systemowa. Lista jest odczytywana z tego hosta (instancja musi być uruchomiona).",
   "ALSA mixer control (optional)": "Sterowanie mikserem ALSA (opcjonalnie)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Gdy asystent odbierze, na chwilę przytrzymaj mikrofon włączony, aby móc kontynuować („…i kuchnia też”) bez ponownego wypowiadania słowa wybudzającego. Po ciszy wraca do trybu słowa wybudzającego.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Po odpowiedzi asystenta mikrofon pozostaje na chwilę włączony, aby można było kontynuować („…i kuchnia też”) lub odpowiedzieć na pytanie doprecyzowujące bez ponownego wypowiadania słowa wybudzającego. Po ciszy wraca do trybu słowa wybudzającego.",
   "Assistant instance": "Instancja asystenta",
   "Audio": "Audio",
   "Audio backend": "Zaplecze audio",

@@ -71,7 +71,6 @@
       "wakeword"
     ],
     "platform": "Javascript/Node.js",
-    "main": "build/main.js",
     "icon": "assistant-satellite.svg",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/ioBroker/ioBroker.assistant-satellite/main/admin/assistant-satellite.svg",
@@ -83,6 +82,7 @@
     "compact": false,
     "connectionType": "local",
     "dataSource": "push",
+    "declareUsedResources": true,
     "adminUI": {
       "config": "json"
     },

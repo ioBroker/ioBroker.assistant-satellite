@@ -5,3 +5,4 @@ build/
 *.tgz
 /src-admin/.__mf__temp/
 /voices/
+.commitinfo

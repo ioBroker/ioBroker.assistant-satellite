@@ -1,10 +1,11 @@
 {
+  "'default' = system default. The list is read from this host (instance must be running).": "'default' = valeur par défaut du système. La liste est lue depuis cet hôte (l'instance doit être en cours d'exécution).",
   "A second wake word — the satellite triggers on any of them.": "Un deuxième mot d'activation — le satellite se déclenche à l'un d'eux.",
   "A third wake word.": "Un troisième mot d'éveil.",
   "ALSA (arecord/aplay)": "ALSA (enregistrement/lecture)",
-  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default.": "ALSA par exemple plughw:2,0 ; ffmpeg = nom dshow / index avfoundation. 'default' = valeur par défaut du système.",
+  "ALSA e.g. plughw:2,0; ffmpeg = dshow name / avfoundation index. 'default' = system default. The list is read from this host (instance must be running).": "ALSA par exemple plughw:2,0 ; ffmpeg = nom dshow / index avfoundation. 'default' = valeur par défaut du système. La liste est lue depuis cet hôte (l'instance doit être en cours d'exécution).",
   "ALSA mixer control (optional)": "Commande de mélangeur ALSA (en option)",
-  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') without saying the wake word again. Falls back to wake-word mode after silence.": "Une fois que l'assistant a répondu, laissez le micro ouvert un court instant pour pouvoir poursuivre (« …et la cuisine aussi ») sans avoir à répéter le mot d'activation. Le mode d'activation par mot d'activation est réactivé après un silence.",
+  "After the assistant answers, keep the mic open briefly so you can continue ('…and the kitchen too') or answer a clarifying question without saying the wake word again. Falls back to wake-word mode after silence.": "Une fois que l'assistant a répondu, le micro reste ouvert un court instant pour pouvoir poursuivre (« …et la cuisine aussi ») ou répondre à une question de précision sans avoir à répéter le mot d'activation. Le mode mot d'activation est réactivé après un silence.",
   "Assistant instance": "Exemple d'assistant",
   "Audio": "Audio",
   "Audio backend": "backend audio",
