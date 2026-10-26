@@ -199,6 +199,8 @@ class AssistantSatellite extends Adapter {
     private announcePlayback: { proc: ChildProcess } | null = null;
     /** Cached ALSA mixer simple-control name (auto-detected once). */
     private mixerControlCache: string | null = null;
+    /** The host has a mixer we can read and drive; without one the core lib scales its playback itself. */
+    private hasMixer = false;
     /** A mixer update is in flight — further writes only set `volumePending` (see `applyVolume`). */
     private volumeBusy = false;
     /** A volume/mute write arrived while the mixer update ran; re-run once it finishes. */
@@ -357,6 +359,7 @@ class AssistantSatellite extends Adapter {
      */
     private async syncVolumeFromHost(): Promise<void> {
         const current = await this.readHostVolume();
+        this.hasMixer = !!current;
         if (!current) {
             this.log.debug('Host volume not readable — volume/mute states left untouched.');
             return;
@@ -420,6 +423,11 @@ class AssistantSatellite extends Adapter {
             // Confirm the write, then push it to the mixer.
             await this.setStateAsync(id.endsWith('.mute') ? 'mute' : 'volume', { val: state.val, ack: true });
             await this.applyVolume();
+            // The UDP satellite reports its level to the assistant (relative "lauter" steps start from it),
+            // and without a mixer it is the one that makes the playback quieter.
+            if (id.endsWith('.volume')) {
+                await this.satellite?.setVolume(Number(state.val), false);
+            }
         }
     }
 
@@ -451,7 +459,7 @@ class AssistantSatellite extends Adapter {
     }
 
     /** Build the core-lib config shared by the UDP satellite and the local listener. */
-    private buildCoreConfig(host: string, port: number): ReturnType<typeof loadConfig> {
+    private buildCoreConfig(host: string, port: number, volume = 100): ReturnType<typeof loadConfig> {
         const c = this.config;
         return loadConfig({
             logLevel: this.log.level === 'debug' || this.log.level === 'silly' ? 'debug' : 'info',
@@ -474,6 +482,7 @@ class AssistantSatellite extends Adapter {
             followUp: !!c.followUp,
             followUpWindowMs: (c.followUpSeconds || 6) * 1000,
             maxFollowUps: 4,
+            volume,
         });
     }
 
@@ -620,7 +629,8 @@ class AssistantSatellite extends Adapter {
             this.log.info(`ioBroker.assistant → ${host}:${port} (instance ${c.assistantInstance || '-'}).`);
         }
 
-        const cfg = this.buildCoreConfig(host, port);
+        const volume = Number((await this.getStateAsync('volume'))?.val ?? 100);
+        const cfg = this.buildCoreConfig(host, port, Number.isFinite(volume) ? volume : 100);
 
         this.satellite = new Satellite(cfg, {
             log: this.log,
@@ -628,6 +638,15 @@ class AssistantSatellite extends Adapter {
                 this.setState('status', { val: state, ack: true }).catch(e =>
                     this.log.error(`Cannot set status: ${e}`),
                 );
+            },
+            // The assistant changed the volume by voice ("lauter", "Lautstärke 5"): mirror it into the state and
+            // drive the mixer — or, without one, let the core lib scale the audio.
+            mixerVolume: this.hasMixer,
+            onVolume: async (level: number) => {
+                await this.setStateAsync('volume', { val: level, ack: true });
+                if (this.hasMixer) {
+                    await this.applyVolume();
+                }
             },
         });
 
