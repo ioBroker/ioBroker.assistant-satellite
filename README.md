@@ -105,6 +105,7 @@ e.g. `!Water leak in the basement`.
     ### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22.19.0 now
 * (@GermanBluefox) UDP transport: "louder", "quieter", "volume 5" said to the assistant change the `volume` state and the mixer of this satellite; a change of the `volume` state is reported to the assistant. Needs `@iobroker/assistant-satellite` 0.2.0
 
 ### 0.1.4 (2026-10-14)
