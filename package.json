@@ -14,7 +14,7 @@
   ],
   "main": "build/main.js",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.19.0"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3",
