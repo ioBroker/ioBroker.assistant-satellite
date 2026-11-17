@@ -104,7 +104,7 @@ e.g. `!Water leak in the basement`.
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.2.0 (2026-11-17)
 * (@GermanBluefox) UDP transport: "louder", "quieter", "volume 5" said to the assistant change the `volume` state and the mixer of this satellite; a change of the `volume` state is reported to the assistant. Needs `@iobroker/assistant-satellite` 0.2.0
 * (@GermanBluefox) UDP transport: when the assistant's answer asks back, the satellite listens for the reply without the wake word (`@iobroker/assistant-satellite` 0.2.0)
 
