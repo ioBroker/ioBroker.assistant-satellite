@@ -106,6 +106,7 @@ e.g. `!Water leak in the basement`.
 -->
 ### **WORK IN PROGRESS**
 * (@GermanBluefox) UDP transport: "louder", "quieter", "volume 5" said to the assistant change the `volume` state and the mixer of this satellite; a change of the `volume` state is reported to the assistant. Needs `@iobroker/assistant-satellite` 0.2.0
+* (@GermanBluefox) UDP transport: when the assistant's answer asks back, the satellite listens for the reply without the wake word (`@iobroker/assistant-satellite` 0.2.0)
 
 ### 0.1.4 (2026-10-14)
 * (@GermanBluefox) Added the missing translations and the sizes for all screens to the settings. Added integration tests, they run on Windows and macOS too
