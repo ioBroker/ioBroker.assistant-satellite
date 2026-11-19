@@ -178,6 +178,10 @@ interface AdapterConfig {
     followUp: boolean;
     /** Seconds to wait for a follow-up before returning to wake-word mode. */
     followUpSeconds: number;
+    /** Barge-in: the wake word interrupts the reply (or the answer still coming) and listens again. */
+    bargeIn?: boolean;
+    /** Wake-word threshold while the reply plays; 0 = the same as `wakewordThreshold`. */
+    bargeInThreshold?: number;
 }
 
 const ipToInt = (ip: string): number => ip.split('.').reduce((acc, o) => (acc << 8) + (Number(o) & 0xff), 0) >>> 0;
@@ -483,6 +487,9 @@ class AssistantSatellite extends Adapter {
             followUpWindowMs: (c.followUpSeconds || 6) * 1000,
             maxFollowUps: 4,
             volume,
+            // missing in configs from before the option: on, like the satellite library
+            bargeIn: c.bargeIn !== false,
+            bargeInThreshold: Number(c.bargeInThreshold) || 0,
         });
     }
 
@@ -500,6 +507,8 @@ class AssistantSatellite extends Adapter {
                 );
             },
             onUtterance: (pcm, sampleRate) => this.queryAssistant(pcm, sampleRate),
+            // the wake word also stops an announcement that is playing (barge-in)
+            onWakeWord: () => this.stopAnnouncement(),
         });
         try {
             await this.localListener.start();
@@ -514,7 +523,7 @@ class AssistantSatellite extends Adapter {
     private async queryAssistant(
         pcm: Buffer,
         sampleRate: number,
-    ): Promise<{ pcm: Buffer; sampleRate: number; listen?: boolean } | null> {
+    ): Promise<{ pcm: Buffer; sampleRate: number; listen?: boolean; text?: string } | null> {
         const inst = this.config.assistantInstance;
         if (!inst) {
             this.log.warn('No assistant instance selected — cannot send the query.');
@@ -554,6 +563,8 @@ class AssistantSatellite extends Adapter {
                     pcm: Buffer.from(res.audio, 'base64'),
                     sampleRate: res.sampleRate || 24000,
                     listen: !!res.listen,
+                    // lets the listener notice a reply that says the wake word itself (no self-interruption)
+                    text: res.answer,
                 };
             }
             return null;
@@ -574,6 +585,15 @@ class AssistantSatellite extends Adapter {
             room: this.config.room || '',
             state,
         });
+    }
+
+    /** Stop the announcement that is playing, if any (the wake word interrupts it). */
+    private stopAnnouncement(): void {
+        if (this.announcePlayback) {
+            this.log.info('Wake word: stopping the announcement.');
+            this.announcePlayback.proc.kill('SIGKILL');
+            this.announcePlayback = null;
+        }
     }
 
     /** Play a pushed announcement (`announce` message from the assistant): raw 16-bit mono PCM (base64). */

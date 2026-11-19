@@ -214,6 +214,33 @@
             "lg": 3,
             "xl": 3
         },
+        "bargeIn": {
+            "newLine": true,
+            "type": "checkbox",
+            "label": "Interrupt with the wake word (barge-in)",
+            "help": "Saying the wake word while the assistant answers stops the answer and starts a new question. Also stops an announcement.",
+            "default": true,
+            "xs": 12,
+            "sm": 8,
+            "md": 5,
+            "lg": 5,
+            "xl": 5
+        },
+        "bargeInThreshold": {
+            "type": "number",
+            "label": "Wake-word threshold while answering",
+            "help": "The microphone hears the answer too. If an answer interrupts itself, set a higher value than the wake-word threshold. 0 = the same.",
+            "default": 0,
+            "min": 0,
+            "max": 1,
+            "step": 0.05,
+            "hidden": "!data.bargeIn",
+            "xs": 12,
+            "sm": 4,
+            "md": 3,
+            "lg": 3,
+            "xl": 3
+        },
         "_wakeTest": {
             "newLine": true,
             "type": "custom",

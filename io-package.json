@@ -145,6 +145,8 @@
     "wakewordUpload": "",
     "followUp": false,
     "followUpSeconds": 6,
+    "bargeIn": true,
+    "bargeInThreshold": 0,
     "wakewordThreshold": 0.5,
     "silenceThreshold": 300,
     "silenceMs": 800,
