@@ -104,7 +104,7 @@ e.g. `!Water leak in the basement`.
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 0.3.0 (2026-11-19)
 * (@GermanBluefox) ioBroker transport: the wake word interrupts the assistant (barge-in) - while it answers, the answer stops and a new question starts; while the answer is still coming, it is dropped. It also stops an announcement. New settings "Interrupt with the wake word" (default on) and "Wake-word threshold while answering". An answer that says the wake word itself (e.g. "ioBroker") does not interrupt itself. Needs @iobroker/assistant-satellite 0.2.0
 
 ### 0.2.0 (2026-11-17)
